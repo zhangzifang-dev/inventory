@@ -7,6 +7,9 @@ import { RoleModule } from './modules/role/role.module';
 import { ProductModule } from './modules/product/product.module';
 import { PurchaseModule } from './modules/purchase/purchase.module';
 import { SalesModule } from './modules/sales/sales.module';
+import { DiscountModule } from './modules/discount/discount.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
+import { ReportModule } from './modules/report/report.module';
 
 @Module({
   imports: [
@@ -34,6 +37,9 @@ import { SalesModule } from './modules/sales/sales.module';
     ProductModule,
     PurchaseModule,
     SalesModule,
+    DiscountModule,
+    InventoryModule,
+    ReportModule,
   ],
   controllers: [],
   providers: [],
