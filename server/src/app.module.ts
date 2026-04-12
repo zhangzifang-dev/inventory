@@ -5,6 +5,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { RoleModule } from './modules/role/role.module';
 import { ProductModule } from './modules/product/product.module';
+import { PurchaseModule } from './modules/purchase/purchase.module';
+import { SalesModule } from './modules/sales/sales.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { ProductModule } from './modules/product/product.module';
     UserModule,
     RoleModule,
     ProductModule,
+    PurchaseModule,
+    SalesModule,
   ],
   controllers: [],
   providers: [],
