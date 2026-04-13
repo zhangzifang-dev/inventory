@@ -201,7 +201,7 @@ export default function Dashboard() {
         </Row>
       </Card>
 
-      <Card title="采购与销售订单金额" style={{ marginBottom: 24 }} loading={chartLoading}>
+      <Card style={{ marginBottom: 24 }} loading={chartLoading}>
         {chartData.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={chartData}>

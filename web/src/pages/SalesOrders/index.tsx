@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Table, Button, Modal, Card, Tag, Descriptions, Badge, Form, Input, Select, Space } from 'antd';
+import { Table, Button, Modal, Card, Tag, Descriptions, Badge, Form, Input, Select } from 'antd';
 import { EyeOutlined, SearchOutlined } from '@ant-design/icons';
 import { salesOrderApi, customerApi, productApi } from '@/services/api';
 
@@ -68,12 +68,6 @@ export default function SalesOrders() {
 
   return (
     <Card 
-      title={
-        <Space>
-          <span>销售订单</span>
-          {filterCount > 0 && <Badge count={filterCount} style={{ backgroundColor: '#1890ff' }} />}
-        </Space>
-      } 
       extra={
         <Form form={filterForm} layout="inline" style={{ gap: 8 }}>
           <Form.Item name="orderNo">
@@ -92,7 +86,7 @@ export default function SalesOrders() {
             ]} />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>查询</Button>
+            <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>查询{filterCount > 0 && <Badge count={filterCount} style={{ marginLeft: 4 }} />}</Button>
           </Form.Item>
         </Form>
       }

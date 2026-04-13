@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Table, Card, Tag, InputNumber, Button, message, Modal, Form, Select, Badge, Space, Input } from 'antd';
+import { Table, Card, Tag, InputNumber, Button, message, Modal, Form, Select, Badge, Input } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { inventoryApi } from '@/services/api';
 
@@ -71,12 +71,6 @@ export default function Inventory() {
 
   return (
     <Card 
-      title={
-        <Space>
-          <span>库存管理</span>
-          {filterCount > 0 && <Badge count={filterCount} style={{ backgroundColor: '#1890ff' }} />}
-        </Space>
-      } 
       extra={
         <Form form={filterForm} layout="inline" style={{ gap: 8 }}>
           <Form.Item name="sku">
@@ -86,7 +80,7 @@ export default function Inventory() {
             <Input placeholder="商品名称" allowClear style={{ width: 120 }} />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>查询</Button>
+            <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>查询{filterCount > 0 && <Badge count={filterCount} style={{ marginLeft: 4 }} />}</Button>
           </Form.Item>
         </Form>
       }

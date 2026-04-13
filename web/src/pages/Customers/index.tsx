@@ -63,12 +63,6 @@ export default function Customers() {
 
   return (
     <Card 
-      title={
-        <Space>
-          <span>客户管理</span>
-          {filterCount > 0 && <Badge count={filterCount} style={{ backgroundColor: '#1890ff' }} />}
-        </Space>
-      } 
       extra={
         <Space>
           <Form form={filterForm} layout="inline" style={{ gap: 8 }}>
@@ -82,7 +76,7 @@ export default function Customers() {
               <Select style={{ width: 80 }} options={[{ label: '全部', value: 'all' }, { label: '启用', value: 'enabled' }, { label: '禁用', value: 'disabled' }]} />
             </Form.Item>
             <Form.Item>
-              <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>查询</Button>
+              <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>查询{filterCount > 0 && <Badge count={filterCount} style={{ marginLeft: 4 }} />}</Button>
             </Form.Item>
           </Form>
           <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>新增客户</Button>

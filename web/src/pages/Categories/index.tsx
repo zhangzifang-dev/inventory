@@ -87,7 +87,7 @@ export default function Categories() {
           background-color: #e8e8e8 !important;
         }
       `}</style>
-      <Card title="分类管理" extra={<Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>新增分类</Button>}>
+      <Card extra={<Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>新增分类</Button>}>
         <Table 
           columns={columns} 
           dataSource={data} 
