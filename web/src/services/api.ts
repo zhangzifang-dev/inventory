@@ -55,8 +55,10 @@ export const inventoryApi = {
 };
 
 export const reportApi = {
-  sales: (params?: any) => request.get('/reports/sales', { params }),
-  purchase: (params?: any) => request.get('/reports/purchase', { params }),
+  sales: (params?: { startDate?: string; endDate?: string; groupBy?: 'day' | 'month'; status?: string }) => 
+    request.get('/reports/sales', { params }),
+  purchase: (params?: { startDate?: string; endDate?: string; groupBy?: 'day' | 'month'; status?: string }) => 
+    request.get('/reports/purchase', { params }),
   profit: (params?: any) => request.get('/reports/profit', { params }),
 };
 
