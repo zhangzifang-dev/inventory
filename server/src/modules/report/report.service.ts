@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between } from 'typeorm';
+import { Repository, Between, In } from 'typeorm';
 import { SalesOrder, SalesOrderStatus } from '../../entities/sales-order.entity';
 import { SalesOrderItem } from '../../entities/sales-order-item.entity';
 import { PurchaseOrder } from '../../entities/purchase-order.entity';
 import { PurchaseOrderItem } from '../../entities/purchase-order-item.entity';
-import { ReportQueryDto } from './dto/report-query.dto';
+import { ReportQueryDto, GroupByType } from './dto/report-query.dto';
 
 export interface SalesReport {
   totalOrders: number;
@@ -49,18 +49,31 @@ export class ReportService {
     const endDate = new Date(query.endDate);
     endDate.setHours(23, 59, 59, 999);
 
+    const whereCondition: any = {
+      createdAt: Between(startDate, endDate),
+    };
+
+    if (query.status) {
+      const statuses = query.status.split(',').map((s) => s.trim());
+      whereCondition.status = In(statuses);
+    } else {
+      whereCondition.status = SalesOrderStatus.COMPLETED;
+    }
+
     const orders = await this.salesOrderRepository.find({
-      where: {
-        createdAt: Between(startDate, endDate),
-        status: SalesOrderStatus.COMPLETED,
-      },
+      where: whereCondition,
     });
 
     const items = await this.salesOrderItemRepository
       .createQueryBuilder('item')
       .innerJoin('item.order', 'order')
       .where('order.createdAt BETWEEN :startDate AND :endDate', { startDate, endDate })
-      .andWhere('order.status = :status', { status: SalesOrderStatus.COMPLETED })
+      .andWhere('order.status IN (:...statuses)', {
+        statuses:
+          whereCondition.status instanceof Array
+            ? whereCondition.status
+            : [whereCondition.status],
+      })
       .getMany();
 
     const totalOrders = orders.length;
@@ -69,7 +82,7 @@ export class ReportService {
     const finalAmount = orders.reduce((sum, o) => sum + Number(o.finalAmount), 0);
     const totalQuantity = items.reduce((sum, i) => sum + i.quantity, 0);
 
-    const byDate = this.groupByDate(orders, 'finalAmount');
+    const byDate = this.groupByDate(orders, 'finalAmount', query.groupBy);
 
     return {
       totalOrders,
@@ -86,10 +99,17 @@ export class ReportService {
     const endDate = new Date(query.endDate);
     endDate.setHours(23, 59, 59, 999);
 
+    const whereCondition: any = {
+      createdAt: Between(startDate, endDate),
+    };
+
+    if (query.status) {
+      const statuses = query.status.split(',').map((s) => s.trim());
+      whereCondition.status = In(statuses);
+    }
+
     const orders = await this.purchaseOrderRepository.find({
-      where: {
-        createdAt: Between(startDate, endDate),
-      },
+      where: whereCondition,
     });
 
     const items = await this.purchaseOrderItemRepository
@@ -102,7 +122,7 @@ export class ReportService {
     const totalAmount = orders.reduce((sum, o) => sum + Number(o.totalAmount), 0);
     const totalQuantity = items.reduce((sum, i) => sum + i.quantity, 0);
 
-    const byDate = this.groupByDate(orders, 'totalAmount');
+    const byDate = this.groupByDate(orders, 'totalAmount', query.groupBy);
 
     return {
       totalOrders,
@@ -132,16 +152,27 @@ export class ReportService {
     };
   }
 
-  private groupByDate(orders: any[], amountField: string): { date: string; amount: number; orders: number }[] {
+  private groupByDate(
+    orders: any[],
+    amountField: string,
+    groupBy?: string,
+  ): { date: string; amount: number; orders: number }[] {
     const grouped: { [key: string]: { amount: number; orders: number } } = {};
 
     for (const order of orders) {
-      const date = order.createdAt.toISOString().split('T')[0];
-      if (!grouped[date]) {
-        grouped[date] = { amount: 0, orders: 0 };
+      let dateKey: string;
+      if (groupBy === 'month') {
+        const date = new Date(order.createdAt);
+        dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      } else {
+        dateKey = order.createdAt.toISOString().split('T')[0];
       }
-      grouped[date].amount += Number(order[amountField]);
-      grouped[date].orders += 1;
+
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = { amount: 0, orders: 0 };
+      }
+      grouped[dateKey].amount += Number(order[amountField]);
+      grouped[dateKey].orders += 1;
     }
 
     return Object.entries(grouped)
