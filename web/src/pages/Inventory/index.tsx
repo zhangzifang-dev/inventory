@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Table, Card, Tag, InputNumber, Button, message, Modal, Form, Select } from 'antd';
+import { Table, Card, Tag, InputNumber, Button, message, Modal, Form, Select, Badge, Space, Input } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 import { inventoryApi } from '@/services/api';
 
 export default function Inventory() {
@@ -9,16 +10,29 @@ export default function Inventory() {
   const [currentItem, setCurrentItem] = useState<any>(null);
   const [form] = Form.useForm();
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
+  const [filterForm] = Form.useForm();
+  const [filterCount, setFilterCount] = useState(0);
 
   useEffect(() => { loadData(); }, []);
 
-  const loadData = async (page = 1, pageSize = 10) => {
+  const loadData = async (page = 1, pageSize = 10, filters?: { sku?: string; name?: string }) => {
     setLoading(true);
     try {
-      const res = await inventoryApi.list({ page, pageSize });
+      const params: any = { page, pageSize };
+      if (filters?.sku) params.sku = filters.sku;
+      if (filters?.name) params.name = filters.name;
+      const res = await inventoryApi.list(params);
       setData(res.data?.list || []);
       setPagination(prev => ({ ...prev, current: page, pageSize, total: res.data?.total || 0 }));
     } finally { setLoading(false); }
+  };
+
+  const handleSearch = () => {
+    const values = filterForm.getFieldsValue();
+    const count = Object.values(values).filter((v: any) => v !== undefined && v !== '').length;
+    setFilterCount(count);
+    loadData(1, pagination.pageSize, values);
+    setPagination(prev => ({ ...prev, current: 1 }));
   };
 
   const handleAdjust = (record: any) => {
@@ -37,7 +51,7 @@ export default function Inventory() {
     });
     message.success('调整成功');
     setAdjustVisible(false);
-    loadData(pagination.current, pagination.pageSize);
+    handleSearch();
   };
 
   const columns = [
@@ -56,8 +70,28 @@ export default function Inventory() {
   ];
 
   return (
-    <Card title="库存管理">
-      <Table columns={columns} dataSource={data} rowKey="id" loading={loading} pagination={{ ...pagination, onChange: loadData }} />
+    <Card 
+      title={
+        <Space>
+          <span>库存管理</span>
+          {filterCount > 0 && <Badge count={filterCount} style={{ backgroundColor: '#1890ff' }} />}
+        </Space>
+      } 
+      extra={
+        <Form form={filterForm} layout="inline" style={{ gap: 8 }}>
+          <Form.Item name="sku">
+            <Input placeholder="SKU" allowClear style={{ width: 100 }} />
+          </Form.Item>
+          <Form.Item name="name">
+            <Input placeholder="商品名称" allowClear style={{ width: 120 }} />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>查询</Button>
+          </Form.Item>
+        </Form>
+      }
+    >
+      <Table columns={columns} dataSource={data} rowKey="id" loading={loading} pagination={{ ...pagination, onChange: (page, pageSize) => loadData(page, pageSize, filterForm.getFieldsValue()) }} />
       <Modal title="库存调整" open={adjustVisible} onOk={handleAdjustSubmit} onCancel={() => setAdjustVisible(false)}>
         <Form form={form} layout="vertical">
           <Form.Item label="当前库存">{currentItem?.quantity}</Form.Item>
