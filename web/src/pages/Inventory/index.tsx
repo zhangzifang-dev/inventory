@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Table, Card, Tag, InputNumber, Button, message, Space, Modal, Form, Select } from 'antd';
-import { inventoryApi, productApi } from '@/services/api';
+import { Table, Card, Tag, InputNumber, Button, message, Modal, Form, Select } from 'antd';
+import { inventoryApi } from '@/services/api';
 
 export default function Inventory() {
   const [data, setData] = useState<any[]>([]);

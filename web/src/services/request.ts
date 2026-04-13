@@ -37,10 +37,10 @@ instance.interceptors.response.use(
 );
 
 const request = {
-  get: (url: string, config?: AxiosRequestConfig) => instance.get(url, config),
-  post: (url: string, data?: unknown, config?: AxiosRequestConfig) => instance.post(url, data, config),
-  put: (url: string, data?: unknown, config?: AxiosRequestConfig) => instance.put(url, data, config),
-  delete: (url: string, config?: AxiosRequestConfig) => instance.delete(url, config),
+  get: <T = any>(url: string, config?: AxiosRequestConfig): Promise<T> => instance.get(url, config) as Promise<T>,
+  post: <T = any>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => instance.post(url, data, config) as Promise<T>,
+  put: <T = any>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => instance.put(url, data, config) as Promise<T>,
+  delete: <T = any>(url: string, config?: AxiosRequestConfig): Promise<T> => instance.delete(url, config) as Promise<T>,
 };
 
 export default request;

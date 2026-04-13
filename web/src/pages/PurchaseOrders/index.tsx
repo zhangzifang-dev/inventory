@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Table, Button, Space, Modal, Form, Input, InputNumber, Select, message, Card, Tag, Descriptions } from 'antd';
+import { Table, Button, Modal, Form, Input, Select, message, Card, Tag, Descriptions } from 'antd';
 import { PlusOutlined, EyeOutlined } from '@ant-design/icons';
 import { purchaseOrderApi, supplierApi, productApi } from '@/services/api';
 
@@ -7,7 +7,7 @@ export default function PurchaseOrders() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [suppliers, setSuppliers] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
+  const [, setProducts] = useState<any[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [detailVisible, setDetailVisible] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<any>(null);

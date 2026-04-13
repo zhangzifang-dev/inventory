@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Table, Button, Space, Modal, Form, Input, InputNumber, Select, message, Card, Tag, Descriptions } from 'antd';
-import { PlusOutlined, EyeOutlined } from '@ant-design/icons';
+import { Table, Button, Modal, Card, Tag, Descriptions } from 'antd';
+import { EyeOutlined } from '@ant-design/icons';
 import { salesOrderApi, customerApi, productApi } from '@/services/api';
 
 export default function SalesOrders() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [customers, setCustomers] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
+  const [, setCustomers] = useState<any[]>([]);
+  const [, setProducts] = useState<any[]>([]);
   const [detailVisible, setDetailVisible] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<any>(null);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
