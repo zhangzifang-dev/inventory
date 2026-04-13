@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Card, Row, Col, Statistic, Table, Tag } from 'antd';
-import { ShoppingCartOutlined, DollarOutlined, UserOutlined, InboxOutlined } from '@ant-design/icons';
-import { productApi, supplierApi, customerApi, purchaseOrderApi, salesOrderApi, inventoryApi } from '@/services/api';
+import { Card, Row, Col, Statistic, Table, Tag, Radio, DatePicker, Select, Empty } from 'antd';
+import { ShoppingCartOutlined, UserOutlined, InboxOutlined } from '@ant-design/icons';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import dayjs from 'dayjs';
+import { productApi, supplierApi, customerApi, purchaseOrderApi, salesOrderApi, inventoryApi, reportApi } from '@/services/api';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -13,6 +15,16 @@ export default function Dashboard() {
   const [purchaseOrders, setPurchaseOrders] = useState<any[]>([]);
   const [salesOrders, setSalesOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [groupBy, setGroupBy] = useState<'day' | 'month'>('day');
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
+    dayjs().subtract(29, 'day'),
+    dayjs(),
+  ]);
+  const [purchaseStatus, setPurchaseStatus] = useState<string[]>([]);
+  const [salesStatus, setSalesStatus] = useState<string[]>([]);
+  const [purchaseChartData, setPurchaseChartData] = useState<any[]>([]);
+  const [salesChartData, setSalesChartData] = useState<any[]>([]);
+  const [chartLoading, setChartLoading] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -41,6 +53,51 @@ export default function Dashboard() {
       console.error('Failed to load dashboard data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadChartData = async () => {
+    setChartLoading(true);
+    try {
+      const params = {
+        startDate: dateRange[0].format('YYYY-MM-DD'),
+        endDate: dateRange[1].format('YYYY-MM-DD'),
+        groupBy,
+        status: purchaseStatus.length > 0 ? purchaseStatus.join(',') : undefined,
+      };
+      const salesParams = {
+        startDate: dateRange[0].format('YYYY-MM-DD'),
+        endDate: dateRange[1].format('YYYY-MM-DD'),
+        groupBy,
+        status: salesStatus.length > 0 ? salesStatus.join(',') : undefined,
+      };
+
+      const [purchaseRes, salesRes] = await Promise.all([
+        reportApi.purchase(params),
+        reportApi.sales(salesParams),
+      ]);
+
+      setPurchaseChartData(purchaseRes.data?.byDate || []);
+      setSalesChartData(salesRes.data?.byDate || []);
+    } catch (error) {
+      console.error('Failed to load chart data:', error);
+    } finally {
+      setChartLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (dateRange[0] && dateRange[1]) {
+      loadChartData();
+    }
+  }, [groupBy, dateRange, purchaseStatus, salesStatus]);
+
+  const handleGroupByChange = (value: 'day' | 'month') => {
+    setGroupBy(value);
+    if (value === 'day') {
+      setDateRange([dayjs().subtract(29, 'day'), dayjs()]);
+    } else {
+      setDateRange([dayjs().subtract(29, 'month'), dayjs()]);
     }
   };
 
@@ -77,6 +134,96 @@ export default function Dashboard() {
         </Col>
         <Col span={6}>
           <Card><Statistic title="库存预警" value={stats.lowStock} prefix={<ShoppingCartOutlined />} valueStyle={{ color: stats.lowStock > 0 ? '#cf1322' : '#3f8600' }} loading={loading} /></Card>
+        </Col>
+      </Row>
+
+      <Card style={{ marginBottom: 24 }}>
+        <Row gutter={16} align="middle">
+          <Col>
+            <Radio.Group value={groupBy} onChange={(e) => handleGroupByChange(e.target.value)}>
+              <Radio.Button value="day">按日</Radio.Button>
+              <Radio.Button value="month">按月</Radio.Button>
+            </Radio.Group>
+          </Col>
+          <Col>
+            <DatePicker.RangePicker
+              value={dateRange}
+              onChange={(dates) => dates && setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs])}
+              picker={groupBy === 'month' ? 'month' : 'date'}
+            />
+          </Col>
+          <Col>
+            <span style={{ marginRight: 8 }}>采购状态:</span>
+            <Select
+              mode="multiple"
+              allowClear
+              style={{ width: 200 }}
+              placeholder="全部状态"
+              value={purchaseStatus}
+              onChange={setPurchaseStatus}
+              options={[
+                { label: '草稿', value: 'draft' },
+                { label: '待审批', value: 'pending' },
+                { label: '已审批', value: 'approved' },
+                { label: '已完成', value: 'completed' },
+                { label: '已取消', value: 'cancelled' },
+              ]}
+            />
+          </Col>
+          <Col>
+            <span style={{ marginRight: 8 }}>销售状态:</span>
+            <Select
+              mode="multiple"
+              allowClear
+              style={{ width: 200 }}
+              placeholder="全部状态"
+              value={salesStatus}
+              onChange={setSalesStatus}
+              options={[
+                { label: '草稿', value: 'draft' },
+                { label: '待审批', value: 'pending' },
+                { label: '已完成', value: 'completed' },
+                { label: '已取消', value: 'cancelled' },
+              ]}
+            />
+          </Col>
+        </Row>
+      </Card>
+
+      <Row gutter={16} style={{ marginBottom: 24 }}>
+        <Col span={12}>
+          <Card title="采购订单金额" loading={chartLoading}>
+            {purchaseChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={purchaseChartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => value !== undefined ? `¥${Number(value).toLocaleString()}` : ''} />
+                  <Bar dataKey="amount" fill="#1890ff" name="金额" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Empty description="暂无数据" style={{ height: 300, display: 'flex', flexDirection: 'column', justifyContent: 'center' }} />
+            )}
+          </Card>
+        </Col>
+        <Col span={12}>
+          <Card title="销售订单金额" loading={chartLoading}>
+            {salesChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={salesChartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => value !== undefined ? `¥${Number(value).toLocaleString()}` : ''} />
+                  <Bar dataKey="amount" fill="#52c41a" name="金额" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <Empty description="暂无数据" style={{ height: 300, display: 'flex', flexDirection: 'column', justifyContent: 'center' }} />
+            )}
+          </Card>
         </Col>
       </Row>
 
