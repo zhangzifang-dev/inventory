@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Card, Row, Col, Statistic, Table, Tag, Radio, DatePicker, Select, Empty } from 'antd';
 import { ShoppingCartOutlined, UserOutlined, InboxOutlined } from '@ant-design/icons';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import dayjs from 'dayjs';
 import { productApi, supplierApi, customerApi, purchaseOrderApi, salesOrderApi, inventoryApi, reportApi } from '@/services/api';
 
@@ -91,6 +91,17 @@ export default function Dashboard() {
       loadChartData();
     }
   }, [groupBy, dateRange, purchaseStatus, salesStatus]);
+
+  const chartData = useMemo(() => {
+    const purchaseMap = new Map(purchaseChartData.map(item => [item.date, item.amount]));
+    const salesMap = new Map(salesChartData.map(item => [item.date, item.amount]));
+    const allDates = new Set([...purchaseMap.keys(), ...salesMap.keys()]);
+    return Array.from(allDates).sort().map(date => ({
+      date,
+      purchase: purchaseMap.get(date) || 0,
+      sales: salesMap.get(date) || 0,
+    }));
+  }, [purchaseChartData, salesChartData]);
 
   const handleGroupByChange = (value: 'day' | 'month') => {
     setGroupBy(value);
@@ -190,42 +201,23 @@ export default function Dashboard() {
         </Row>
       </Card>
 
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={12}>
-          <Card title="采购订单金额" loading={chartLoading}>
-            {purchaseChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={purchaseChartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => value !== undefined ? `¥${Number(value).toLocaleString()}` : ''} />
-                  <Bar dataKey="amount" fill="#1890ff" name="金额" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <Empty description="暂无数据" style={{ height: 300, display: 'flex', flexDirection: 'column', justifyContent: 'center' }} />
-            )}
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card title="销售订单金额" loading={chartLoading}>
-            {salesChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={salesChartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => value !== undefined ? `¥${Number(value).toLocaleString()}` : ''} />
-                  <Bar dataKey="amount" fill="#52c41a" name="金额" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <Empty description="暂无数据" style={{ height: 300, display: 'flex', flexDirection: 'column', justifyContent: 'center' }} />
-            )}
-          </Card>
-        </Col>
-      </Row>
+      <Card title="采购与销售订单金额" style={{ marginBottom: 24 }} loading={chartLoading}>
+        {chartData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip formatter={(value) => value !== undefined ? `¥${Number(value).toLocaleString()}` : ''} />
+              <Legend />
+              <Bar dataKey="purchase" fill="#1890ff" name="采购金额" />
+              <Bar dataKey="sales" fill="#52c41a" name="销售金额" />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <Empty description="暂无数据" style={{ height: 300, display: 'flex', flexDirection: 'column', justifyContent: 'center' }} />
+        )}
+      </Card>
 
       <Row gutter={16}>
         <Col span={12}>
