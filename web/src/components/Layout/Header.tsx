@@ -1,13 +1,26 @@
 import { Layout, Dropdown, Avatar } from 'antd';
 import { UserOutlined, LogoutOutlined } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useUserStore } from '@/stores/useUserStore';
 import type { MenuProps } from 'antd';
 
 const { Header: AntHeader } = Layout;
 
+const titleMap: Record<string, string> = {
+  '/dashboard': '工作台',
+  '/products': '商品管理',
+  '/categories': '分类管理',
+  '/suppliers': '供应商管理',
+  '/customers': '客户管理',
+  '/purchase-orders': '采购订单',
+  '/sales-orders': '销售订单',
+  '/inventory': '库存管理',
+  '/users': '用户管理',
+};
+
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useUserStore();
 
   const handleLogout = () => {
@@ -24,6 +37,8 @@ const Header = () => {
     },
   ];
 
+  const title = titleMap[location.pathname] || '进销存管理系统';
+
   return (
     <AntHeader
       style={{
@@ -36,7 +51,7 @@ const Header = () => {
       }}
     >
       <span style={{ fontSize: 18, fontWeight: 600 }}>
-        进销存管理系统
+        {title}
       </span>
       <Dropdown menu={{ items }} placement="bottomRight">
         <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
