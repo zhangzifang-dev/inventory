@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Table, Button, Space, Modal, Form, Input, InputNumber, Select, message, Popconfirm, Card, Collapse, Badge } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, DownOutlined } from '@ant-design/icons';
+import { Table, Button, Space, Modal, Form, Input, InputNumber, Select, message, Popconfirm, Card, Badge } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import { productApi, categoryApi } from '@/services/api';
 
 export default function Products() {
@@ -70,26 +70,6 @@ export default function Products() {
     )},
   ];
 
-  const filterPanel = (
-    <Form form={filterForm} layout="inline" style={{ gap: 16 }}>
-      <Form.Item name="name" label="商品名称">
-        <Input placeholder="请输入商品名称" allowClear style={{ width: 150 }} />
-      </Form.Item>
-      <Form.Item name="sku" label="SKU编码">
-        <Input placeholder="请输入SKU" allowClear style={{ width: 120 }} />
-      </Form.Item>
-      <Form.Item name="categoryId" label="商品分类">
-        <Select placeholder="全部分类" allowClear style={{ width: 150 }} options={categories.map(c => ({ label: c.name, value: c.id }))} />
-      </Form.Item>
-      <Form.Item name="status" label="状态" initialValue="all">
-        <Select style={{ width: 100 }} options={[{ label: '全部', value: 'all' }, { label: '启用', value: 'enabled' }, { label: '禁用', value: 'disabled' }]} />
-      </Form.Item>
-      <Form.Item>
-        <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>查询</Button>
-      </Form.Item>
-    </Form>
-  );
-
   return (
     <Card 
       title={
@@ -98,14 +78,29 @@ export default function Products() {
           {filterCount > 0 && <Badge count={filterCount} style={{ backgroundColor: '#1890ff' }} />}
         </Space>
       } 
-      extra={<Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>新增商品</Button>}
+      extra={
+        <Space>
+          <Form form={filterForm} layout="inline" style={{ gap: 8 }}>
+            <Form.Item name="name">
+              <Input placeholder="商品名称" allowClear style={{ width: 120 }} />
+            </Form.Item>
+            <Form.Item name="sku">
+              <Input placeholder="SKU" allowClear style={{ width: 100 }} />
+            </Form.Item>
+            <Form.Item name="categoryId">
+              <Select placeholder="分类" allowClear style={{ width: 120 }} options={categories.map(c => ({ label: c.name, value: c.id }))} />
+            </Form.Item>
+            <Form.Item name="status" initialValue="all">
+              <Select style={{ width: 80 }} options={[{ label: '全部', value: 'all' }, { label: '启用', value: 'enabled' }, { label: '禁用', value: 'disabled' }]} />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>查询</Button>
+            </Form.Item>
+          </Form>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>新增商品</Button>
+        </Space>
+      }
     >
-      <Collapse 
-        ghost 
-        expandIcon={({ isActive }) => <DownOutlined rotate={isActive ? 0 : -90} />}
-        items={[{ key: '1', label: '筛选条件', children: filterPanel }]}
-        style={{ marginBottom: 16 }}
-      />
       <Table columns={columns} dataSource={data} rowKey="id" loading={loading} pagination={{ ...pagination, onChange: (page, pageSize) => loadData(page, pageSize, filterForm.getFieldsValue()) }} />
       <Modal title={editingId ? '编辑商品' : '新增商品'} open={modalVisible} onOk={handleSubmit} onCancel={() => setModalVisible(false)} width={600}>
         <Form form={form} layout="vertical">
