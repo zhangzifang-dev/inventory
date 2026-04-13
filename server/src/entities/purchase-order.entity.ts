@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { Supplier } from './supplier.entity';
 import { User } from './user.entity';
@@ -53,9 +54,11 @@ export class PurchaseOrder {
   updatedAt: Date;
 
   @ManyToOne(() => Supplier)
+  @JoinColumn({ name: 'supplier_id' })
   supplier: Supplier;
 
   @ManyToOne(() => User)
+  @JoinColumn({ name: 'created_by_id' })
   createdBy: User;
 
   @OneToMany(() => PurchaseOrderItem, (item) => item.order, { cascade: true })

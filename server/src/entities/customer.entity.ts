@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { CustomerLevel } from './customer-level.entity';
 
@@ -38,5 +39,6 @@ export class Customer {
   updatedAt: Date;
 
   @ManyToOne(() => CustomerLevel, (level) => level.customers)
+  @JoinColumn({ name: 'level_id' })
   level: CustomerLevel;
 }

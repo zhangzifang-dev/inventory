@@ -1,52 +1,45 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Body,
-  Param,
-  Query,
-  ParseIntPipe,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto } from './dto/query-product.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { Product } from '../../entities/product.entity';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiTags('商品管理')
+@ApiBearerAuth('JWT-auth')
 @Controller('products')
 @UseGuards(JwtAuthGuard)
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
-  async create(@Body() dto: CreateProductDto): Promise<Product> {
+  @ApiOperation({ summary: '创建商品' })
+  async create(@Body() dto: CreateProductDto) {
     return this.productService.create(dto);
   }
 
   @Get()
+  @ApiOperation({ summary: '获取商品列表' })
   async findAll(@Query() query: QueryProductDto) {
     return this.productService.findAll(query);
   }
 
   @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<Product> {
+  @ApiOperation({ summary: '获取商品详情' })
+  async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productService.findOne(id);
   }
 
   @Put(':id')
-  async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateProductDto,
-  ): Promise<Product> {
+  @ApiOperation({ summary: '更新商品' })
+  async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateProductDto) {
     return this.productService.update(id, dto);
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  @ApiOperation({ summary: '删除商品' })
+  async remove(@Param('id', ParseIntPipe) id: number) {
     return this.productService.remove(id);
   }
 }

@@ -1,21 +1,27 @@
-import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiTags('认证')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  @ApiOperation({ summary: '用户登录' })
+  @ApiResponse({ status: 200, description: '登录成功' })
+  @ApiResponse({ status: 401, description: '用户名或密码错误' })
+  async login(@Body() loginDto: LoginDto) {
+    return this.authService.login(loginDto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('profile')
-  async getProfile(@CurrentUser() user: any) {
-    return user;
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: '获取当前用户信息' })
+  @ApiResponse({ status: 200, description: '成功' })
+  @ApiResponse({ status: 401, description: '未授权' })
+  async getProfile(@Request() req: any) {
+    return req.user;
   }
 }

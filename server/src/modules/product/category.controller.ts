@@ -1,50 +1,44 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Body,
-  Param,
-  ParseIntPipe,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { Category } from '../../entities/category.entity';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiTags('分类管理')
+@ApiBearerAuth('JWT-auth')
 @Controller('categories')
 @UseGuards(JwtAuthGuard)
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Post()
-  async create(@Body() dto: CreateCategoryDto): Promise<Category> {
+  @ApiOperation({ summary: '创建分类' })
+  async create(@Body() dto: CreateCategoryDto) {
     return this.categoryService.create(dto);
   }
 
   @Get()
-  async findAll(): Promise<Category[]> {
+  @ApiOperation({ summary: '获取分类列表' })
+  async findAll() {
     return this.categoryService.findAll();
   }
 
   @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<Category> {
+  @ApiOperation({ summary: '获取分类详情' })
+  async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.categoryService.findOne(id);
   }
 
   @Put(':id')
-  async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateCategoryDto,
-  ): Promise<Category> {
+  @ApiOperation({ summary: '更新分类' })
+  async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateCategoryDto) {
     return this.categoryService.update(id, dto);
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  @ApiOperation({ summary: '删除分类' })
+  async remove(@Param('id', ParseIntPipe) id: number) {
     return this.categoryService.remove(id);
   }
 }

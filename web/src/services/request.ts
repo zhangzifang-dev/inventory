@@ -5,32 +5,23 @@ import { useUserStore } from '@/stores/useUserStore';
 const instance: AxiosInstance = axios.create({
   baseURL: '/api/v1',
   timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
 });
 
 instance.interceptors.request.use(
   (config) => {
     const token = useUserStore.getState().token;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    if (token) { config.headers.Authorization = `Bearer ${token}`; }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 instance.interceptors.response.use(
-  (response: AxiosResponse) => {
-    return response.data;
-  },
+  (response: AxiosResponse) => response.data,
   (error) => {
     if (error.response) {
       const { status, data } = error.response;
-      
       if (status === 401) {
         useUserStore.getState().logout();
         window.location.href = '/login';
@@ -45,18 +36,11 @@ instance.interceptors.response.use(
   }
 );
 
-export const get = <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
-  return instance.get(url, config);
+const request = {
+  get: (url: string, config?: AxiosRequestConfig) => instance.get(url, config),
+  post: (url: string, data?: unknown, config?: AxiosRequestConfig) => instance.post(url, data, config),
+  put: (url: string, data?: unknown, config?: AxiosRequestConfig) => instance.put(url, data, config),
+  delete: (url: string, config?: AxiosRequestConfig) => instance.delete(url, config),
 };
 
-export const post = <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => {
-  return instance.post(url, data, config);
-};
-
-export const put = <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => {
-  return instance.put(url, data, config);
-};
-
-export const del = <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
-  return instance.delete(url, config);
-};
+export default request;
