@@ -149,27 +149,24 @@ export default function Dashboard() {
       </Row>
 
       <Card style={{ marginBottom: 24 }}>
-        <Row gutter={16} align="middle">
-          <Col>
-            <Radio.Group value={groupBy} onChange={(e) => handleGroupByChange(e.target.value)}>
-              <Radio.Button value="day">按日</Radio.Button>
-              <Radio.Button value="month">按月</Radio.Button>
-            </Radio.Group>
-          </Col>
-          <Col>
-            <DatePicker.RangePicker
-              value={dateRange}
-              onChange={(dates) => dates && setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs])}
-              picker={groupBy === 'month' ? 'month' : 'date'}
-            />
-          </Col>
-          <Col>
-            <span style={{ marginRight: 8 }}>采购状态:</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'nowrap' }}>
+          <Radio.Group value={groupBy} onChange={(e) => handleGroupByChange(e.target.value)} style={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
+            <Radio.Button value="day">按日</Radio.Button>
+            <Radio.Button value="month">按月</Radio.Button>
+          </Radio.Group>
+          <DatePicker.RangePicker
+            value={dateRange}
+            onChange={(dates) => dates && setDateRange(dates as [dayjs.Dayjs, dayjs.Dayjs])}
+            picker={groupBy === 'month' ? 'month' : 'date'}
+            style={{ width: 240, flexShrink: 0 }}
+          />
+          <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+            <span style={{ marginRight: 6, whiteSpace: 'nowrap' }}>采购状态:</span>
             <Select
               mode="multiple"
               allowClear
-              style={{ width: 200 }}
-              placeholder="全部状态"
+              style={{ width: 120 }}
+              placeholder="全部"
               value={purchaseStatus}
               onChange={setPurchaseStatus}
               options={[
@@ -180,14 +177,14 @@ export default function Dashboard() {
                 { label: '已取消', value: 'cancelled' },
               ]}
             />
-          </Col>
-          <Col>
-            <span style={{ marginRight: 8 }}>销售状态:</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+            <span style={{ marginRight: 6, whiteSpace: 'nowrap' }}>销售状态:</span>
             <Select
               mode="multiple"
               allowClear
-              style={{ width: 200 }}
-              placeholder="全部状态"
+              style={{ width: 120 }}
+              placeholder="全部"
               value={salesStatus}
               onChange={setSalesStatus}
               options={[
@@ -197,8 +194,8 @@ export default function Dashboard() {
                 { label: '已取消', value: 'cancelled' },
               ]}
             />
-          </Col>
-        </Row>
+          </div>
+        </div>
       </Card>
 
       <Card style={{ marginBottom: 24 }} loading={chartLoading}>
