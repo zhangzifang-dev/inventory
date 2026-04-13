@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  Index,
 } from 'typeorm';
 import { Customer } from './customer.entity';
 
@@ -30,6 +31,13 @@ export class CustomerLevel {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @Index()
+  @Column({ name: 'deleted_at', type: 'datetime', nullable: true })
+  deletedAt: Date | null;
+
+  @Column({ name: 'deleted_by', nullable: true })
+  deletedBy: number;
 
   @OneToMany(() => Customer, (customer) => customer.level)
   customers: Customer[];

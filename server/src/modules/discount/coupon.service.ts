@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { Repository, Like, IsNull } from 'typeorm';
 import { Coupon, CouponType } from '../../entities/coupon.entity';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
@@ -29,7 +29,7 @@ export class CouponService {
   }
 
   async findAll(query: QueryCouponDto): Promise<PaginatedResponseDto<Coupon>> {
-    const where: any = {};
+    const where: any = { deletedAt: IsNull() };
 
     if (query.code) {
       where.code = Like(`%${query.code}%`);
@@ -56,7 +56,7 @@ export class CouponService {
 
   async findOne(id: number): Promise<Coupon> {
     const coupon = await this.couponRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
     });
 
     if (!coupon) {
@@ -68,7 +68,7 @@ export class CouponService {
 
   async update(id: number, dto: UpdateCouponDto): Promise<Coupon> {
     const coupon = await this.couponRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
     });
 
     if (!coupon) {
@@ -77,7 +77,7 @@ export class CouponService {
 
     if (dto.code && dto.code !== coupon.code) {
       const existingCoupon = await this.couponRepository.findOne({
-        where: { code: dto.code },
+        where: { code: dto.code, deletedAt: IsNull() },
       });
       if (existingCoupon) {
         throw new BadRequestException('优惠券码已存在');
@@ -88,21 +88,24 @@ export class CouponService {
     return this.couponRepository.save(coupon);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, userId: number): Promise<void> {
     const coupon = await this.couponRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
     });
 
     if (!coupon) {
       throw new NotFoundException('优惠券不存在');
     }
 
-    await this.couponRepository.remove(coupon);
+    await this.couponRepository.update(id, {
+      deletedAt: new Date(),
+      deletedBy: userId,
+    });
   }
 
   async validateCoupon(dto: ValidateCouponDto): Promise<{ valid: boolean; discountAmount: number; message: string; coupon?: Coupon }> {
     const coupon = await this.couponRepository.findOne({
-      where: { code: dto.code },
+      where: { code: dto.code, deletedAt: IsNull() },
     });
 
     if (!coupon) {

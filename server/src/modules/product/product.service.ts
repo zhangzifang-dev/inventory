@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository, Like, IsNull } from 'typeorm';
 import { Product } from '../../entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -16,7 +16,7 @@ export class ProductService {
 
   async create(dto: CreateProductDto): Promise<Product> {
     const existingProduct = await this.productRepository.findOne({
-      where: { sku: dto.sku },
+      where: { sku: dto.sku, deletedAt: IsNull() },
     });
 
     if (existingProduct) {
@@ -28,7 +28,7 @@ export class ProductService {
   }
 
   async findAll(query: QueryProductDto): Promise<PaginatedResponseDto<Product>> {
-    const where: any = {};
+    const where: any = { deletedAt: IsNull() };
     
     if (query.sku) {
       where.sku = Like(`%${query.sku}%`);
@@ -59,7 +59,7 @@ export class ProductService {
 
   async findOne(id: number): Promise<Product> {
     const product = await this.productRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
       relations: ['category'],
     });
 
@@ -72,7 +72,7 @@ export class ProductService {
 
   async update(id: number, dto: UpdateProductDto): Promise<Product> {
     const product = await this.productRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
     });
 
     if (!product) {
@@ -81,7 +81,7 @@ export class ProductService {
 
     if (dto.sku && dto.sku !== product.sku) {
       const existingProduct = await this.productRepository.findOne({
-        where: { sku: dto.sku },
+        where: { sku: dto.sku, deletedAt: IsNull() },
       });
       if (existingProduct) {
         throw new BadRequestException('SKU已存在');
@@ -92,15 +92,18 @@ export class ProductService {
     return this.productRepository.save(product);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, userId: number): Promise<void> {
     const product = await this.productRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
     });
 
     if (!product) {
       throw new NotFoundException('商品不存在');
     }
 
-    await this.productRepository.remove(product);
+    await this.productRepository.update(id, {
+      deletedAt: new Date(),
+      deletedBy: userId,
+    });
   }
 }

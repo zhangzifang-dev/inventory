@@ -9,6 +9,7 @@ import {
   Query,
   ParseIntPipe,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { CouponService } from './coupon.service';
 import { CreateCouponDto } from './dto/create-coupon.dto';
@@ -52,7 +53,8 @@ export class CouponController {
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.couponService.remove(id);
+  async remove(@Param('id', ParseIntPipe) id: number, @Req() req: any): Promise<void> {
+    const userId = req.user?.id;
+    return this.couponService.remove(id, userId);
   }
 }

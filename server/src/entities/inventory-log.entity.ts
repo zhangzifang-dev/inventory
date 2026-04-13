@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   ManyToOne,
+  Index,
 } from 'typeorm';
 import { Product } from './product.entity';
 import { User } from './user.entity';
@@ -48,6 +49,13 @@ export class InventoryLog {
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @Index()
+  @Column({ name: 'deleted_at', type: 'datetime', nullable: true })
+  deletedAt: Date | null;
+
+  @Column({ name: 'deleted_by', nullable: true })
+  deletedBy: number;
 
   @ManyToOne(() => Product)
   product: Product;

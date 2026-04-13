@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository, Like, IsNull } from 'typeorm';
 import { Customer } from '../../entities/customer.entity';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
@@ -20,7 +20,7 @@ export class CustomerService {
   }
 
   async findAll(query: QueryCustomerDto): Promise<PaginatedResponseDto<Customer>> {
-    const where: any = {};
+    const where: any = { deletedAt: IsNull() };
     
     if (query.name) {
       where.name = Like(`%${query.name}%`);
@@ -51,7 +51,7 @@ export class CustomerService {
 
   async findOne(id: number): Promise<Customer> {
     const customer = await this.customerRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
       relations: ['level'],
     });
 
@@ -64,7 +64,7 @@ export class CustomerService {
 
   async update(id: number, dto: UpdateCustomerDto): Promise<Customer> {
     const customer = await this.customerRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
     });
 
     if (!customer) {
@@ -75,16 +75,18 @@ export class CustomerService {
     return this.customerRepository.save(customer);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, userId: number): Promise<void> {
     const customer = await this.customerRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
     });
 
     if (!customer) {
       throw new NotFoundException('客户不存在');
     }
 
-    await this.customerRepository.remove(customer);
+    customer.deletedAt = new Date();
+    customer.deletedBy = userId;
+    await this.customerRepository.save(customer);
   }
 
   async updateTotalAmount(id: number, amount: number): Promise<void> {

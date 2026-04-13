@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, ParseIntPipe, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, ParseIntPipe, UseGuards, Request, Delete } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
 import { QueryInventoryDto } from './dto/query-inventory.dto';
@@ -41,5 +41,11 @@ export class InventoryController {
   @ApiOperation({ summary: '更新库存' })
   async update(@Body() dto: UpdateInventoryDto, @Request() req: any) {
     return this.inventoryService.updateStock(dto, req.user.id);
+  }
+
+  @Delete(':productId')
+  @ApiOperation({ summary: '删除库存' })
+  async remove(@Param('productId', ParseIntPipe) productId: number, @Request() req: any) {
+    return this.inventoryService.remove(productId, req.user.id);
   }
 }

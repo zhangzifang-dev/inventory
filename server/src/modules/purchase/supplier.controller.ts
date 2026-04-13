@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, ParseIntPipe, UseGuards, Req } from '@nestjs/common';
 import { SupplierService } from './supplier.service';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
@@ -39,7 +39,7 @@ export class SupplierController {
 
   @Delete(':id')
   @ApiOperation({ summary: '删除供应商' })
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    return this.supplierService.remove(id);
+  async remove(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+    return this.supplierService.remove(id, req.user.id);
   }
 }

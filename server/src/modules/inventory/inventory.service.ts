@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository, Like, IsNull } from 'typeorm';
 import { Inventory } from '../../entities/inventory.entity';
 import { InventoryLog, InventoryLogType } from '../../entities/inventory-log.entity';
 import { Product } from '../../entities/product.entity';
@@ -26,7 +26,8 @@ export class InventoryService {
 
     const qb = this.inventoryRepository
       .createQueryBuilder('inventory')
-      .leftJoinAndSelect('inventory.product', 'product');
+      .leftJoinAndSelect('inventory.product', 'product')
+      .where('inventory.deletedAt IS NULL');
 
     if (query.productId) {
       qb.andWhere('inventory.productId = :productId', { productId: query.productId });
@@ -46,7 +47,7 @@ export class InventoryService {
 
   async findOne(productId: number): Promise<Inventory> {
     const inventory = await this.inventoryRepository.findOne({
-      where: { productId },
+      where: { productId, deletedAt: IsNull() },
       relations: ['product'],
     });
 
@@ -59,7 +60,7 @@ export class InventoryService {
 
   async getOrCreateInventory(productId: number): Promise<Inventory> {
     let inventory = await this.inventoryRepository.findOne({
-      where: { productId },
+      where: { productId, deletedAt: IsNull() },
     });
 
     if (!inventory) {
@@ -128,7 +129,7 @@ export class InventoryService {
   }
 
   async getLogs(query: QueryInventoryLogDto): Promise<PaginatedResponseDto<InventoryLog>> {
-    const where: any = {};
+    const where: any = { deletedAt: IsNull() };
 
     if (query.productId) {
       where.productId = query.productId;
@@ -156,6 +157,21 @@ export class InventoryService {
       .createQueryBuilder('inventory')
       .leftJoinAndSelect('inventory.product', 'product')
       .where('inventory.quantity <= inventory.warningQuantity')
+      .andWhere('inventory.deletedAt IS NULL')
       .getMany();
+  }
+
+  async remove(productId: number, userId: number): Promise<void> {
+    const inventory = await this.inventoryRepository.findOne({
+      where: { productId, deletedAt: IsNull() },
+    });
+
+    if (!inventory) {
+      throw new NotFoundException('库存记录不存在');
+    }
+
+    inventory.deletedAt = new Date();
+    inventory.deletedBy = userId;
+    await this.inventoryRepository.save(inventory);
   }
 }

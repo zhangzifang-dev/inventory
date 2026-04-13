@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository, Like, IsNull } from 'typeorm';
 import { Discount } from '../../entities/discount.entity';
 import { CreateDiscountDto } from './dto/create-discount.dto';
 import { UpdateDiscountDto } from './dto/update-discount.dto';
@@ -20,7 +20,7 @@ export class DiscountService {
   }
 
   async findAll(query: QueryDiscountDto): Promise<PaginatedResponseDto<Discount>> {
-    const where: any = {};
+    const where: any = { deletedAt: IsNull() };
 
     if (query.name) {
       where.name = Like(`%${query.name}%`);
@@ -44,7 +44,7 @@ export class DiscountService {
 
   async findOne(id: number): Promise<Discount> {
     const discount = await this.discountRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
     });
 
     if (!discount) {
@@ -56,7 +56,7 @@ export class DiscountService {
 
   async update(id: number, dto: UpdateDiscountDto): Promise<Discount> {
     const discount = await this.discountRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
     });
 
     if (!discount) {
@@ -67,16 +67,19 @@ export class DiscountService {
     return this.discountRepository.save(discount);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, userId: number): Promise<void> {
     const discount = await this.discountRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
     });
 
     if (!discount) {
       throw new NotFoundException('折扣活动不存在');
     }
 
-    await this.discountRepository.remove(discount);
+    await this.discountRepository.update(id, {
+      deletedAt: new Date(),
+      deletedBy: userId,
+    });
   }
 
   async getActiveDiscounts(): Promise<Discount[]> {
@@ -84,6 +87,7 @@ export class DiscountService {
     return this.discountRepository.find({
       where: {
         status: true,
+        deletedAt: IsNull(),
       },
     });
   }

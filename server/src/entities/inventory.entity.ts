@@ -5,6 +5,7 @@ import {
   UpdateDateColumn,
   OneToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Product } from './product.entity';
 
@@ -24,6 +25,13 @@ export class Inventory {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @Index()
+  @Column({ name: 'deleted_at', type: 'datetime', nullable: true })
+  deletedAt: Date | null;
+
+  @Column({ name: 'deleted_by', nullable: true })
+  deletedBy: number;
 
   @OneToOne(() => Product)
   @JoinColumn({ name: 'product_id' })

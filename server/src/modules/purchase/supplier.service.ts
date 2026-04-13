@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository, Like, IsNull } from 'typeorm';
 import { Supplier } from '../../entities/supplier.entity';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
@@ -20,7 +20,7 @@ export class SupplierService {
   }
 
   async findAll(query: QuerySupplierDto): Promise<PaginatedResponseDto<Supplier>> {
-    const where: any = {};
+    const where: any = { deletedAt: IsNull() };
     
     if (query.name) {
       where.name = Like(`%${query.name}%`);
@@ -47,7 +47,7 @@ export class SupplierService {
 
   async findOne(id: number): Promise<Supplier> {
     const supplier = await this.supplierRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
     });
 
     if (!supplier) {
@@ -59,7 +59,7 @@ export class SupplierService {
 
   async update(id: number, dto: UpdateSupplierDto): Promise<Supplier> {
     const supplier = await this.supplierRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
     });
 
     if (!supplier) {
@@ -70,15 +70,17 @@ export class SupplierService {
     return this.supplierRepository.save(supplier);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, userId: number): Promise<void> {
     const supplier = await this.supplierRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
     });
 
     if (!supplier) {
       throw new NotFoundException('供应商不存在');
     }
 
-    await this.supplierRepository.remove(supplier);
+    supplier.deletedAt = new Date();
+    supplier.deletedBy = userId;
+    await this.supplierRepository.save(supplier);
   }
 }

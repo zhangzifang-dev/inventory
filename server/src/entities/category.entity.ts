@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  Index,
   ManyToOne,
   OneToMany,
 } from 'typeorm';
@@ -23,6 +24,13 @@ export class Category {
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @Index()
+  @Column({ name: 'deleted_at', type: 'datetime', nullable: true })
+  deletedAt: Date | null;
+
+  @Column({ name: 'deleted_by', nullable: true })
+  deletedBy: number;
 
   @ManyToOne(() => Category, (category) => category.children)
   parent: Category;

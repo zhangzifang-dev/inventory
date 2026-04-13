@@ -39,7 +39,7 @@ export class PurchaseOrderController {
 
   @Delete(':id')
   @ApiOperation({ summary: '删除采购订单' })
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    return this.purchaseOrderService.remove(id);
+  async remove(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
+    return this.purchaseOrderService.remove(id, req.user.id);
   }
 }

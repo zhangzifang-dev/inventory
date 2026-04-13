@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, Like } from 'typeorm';
+import { Repository, DataSource, Like, IsNull } from 'typeorm';
 import { SalesOrder, SalesOrderStatus } from '../../entities/sales-order.entity';
 import { SalesOrderItem } from '../../entities/sales-order-item.entity';
 import { Product } from '../../entities/product.entity';
@@ -102,7 +102,7 @@ export class SalesOrderService {
   }
 
   async findAll(query: QuerySalesOrderDto): Promise<PaginatedResponseDto<SalesOrder>> {
-    const where: any = {};
+    const where: any = { deletedAt: IsNull() };
     
     if (query.orderNo) {
       where.orderNo = Like(`%${query.orderNo}%`);
@@ -130,7 +130,7 @@ export class SalesOrderService {
 
   async findOne(id: number): Promise<SalesOrder> {
     const order = await this.salesOrderRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
       relations: ['customer', 'customer.level', 'items', 'items.product', 'createdBy'],
     });
 
@@ -154,15 +154,17 @@ export class SalesOrderService {
     return this.salesOrderRepository.save(order);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, userId: number): Promise<void> {
     const order = await this.salesOrderRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
     });
 
     if (!order) {
       throw new NotFoundException('销售订单不存在');
     }
 
-    await this.salesOrderRepository.remove(order);
+    order.deletedAt = new Date();
+    order.deletedBy = userId;
+    await this.salesOrderRepository.save(order);
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 import { Category } from '../../entities/category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -15,7 +15,7 @@ export class CategoryService {
   async create(dto: CreateCategoryDto): Promise<Category> {
     if (dto.parentId) {
       const parent = await this.categoryRepository.findOne({
-        where: { id: dto.parentId },
+        where: { id: dto.parentId, deletedAt: IsNull() },
       });
       if (!parent) {
         throw new BadRequestException('父分类不存在');
@@ -28,6 +28,7 @@ export class CategoryService {
 
   async findAll(): Promise<Category[]> {
     const categories = await this.categoryRepository.find({
+      where: { deletedAt: IsNull() },
       order: { sort: 'ASC', id: 'ASC' },
     });
 
@@ -59,7 +60,7 @@ export class CategoryService {
 
   async findOne(id: number): Promise<Category> {
     const category = await this.categoryRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
       relations: ['children'],
     });
 
@@ -72,7 +73,7 @@ export class CategoryService {
 
   async update(id: number, dto: UpdateCategoryDto): Promise<Category> {
     const category = await this.categoryRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
     });
 
     if (!category) {
@@ -85,7 +86,7 @@ export class CategoryService {
       }
       if (dto.parentId !== null) {
         const parent = await this.categoryRepository.findOne({
-          where: { id: dto.parentId },
+          where: { id: dto.parentId, deletedAt: IsNull() },
         });
         if (!parent) {
           throw new BadRequestException('父分类不存在');
@@ -97,9 +98,9 @@ export class CategoryService {
     return this.categoryRepository.save(category);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, userId: number): Promise<void> {
     const category = await this.categoryRepository.findOne({
-      where: { id },
+      where: { id, deletedAt: IsNull() },
       relations: ['children'],
     });
 
@@ -107,10 +108,14 @@ export class CategoryService {
       throw new NotFoundException('分类不存在');
     }
 
-    if (category.children && category.children.length > 0) {
+    const activeChildren = category.children?.filter(c => c.deletedAt === null) || [];
+    if (activeChildren.length > 0) {
       throw new BadRequestException('该分类下存在子分类，无法删除');
     }
 
-    await this.categoryRepository.remove(category);
+    await this.categoryRepository.update(id, {
+      deletedAt: new Date(),
+      deletedBy: userId,
+    });
   }
 }

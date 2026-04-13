@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, ParseIntPipe, UseGuards, Req } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
@@ -39,7 +39,8 @@ export class CustomerController {
 
   @Delete(':id')
   @ApiOperation({ summary: '删除客户' })
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    return this.customerService.remove(id);
+  async remove(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+    const userId = req.user?.id;
+    return this.customerService.remove(id, userId);
   }
 }

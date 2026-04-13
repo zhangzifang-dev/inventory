@@ -8,6 +8,7 @@ import {
   Param,
   ParseIntPipe,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { CustomerLevelService } from './customer-level.service';
 import { CreateCustomerLevelDto } from './dto/create-customer-level.dto';
@@ -44,7 +45,11 @@ export class CustomerLevelController {
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.customerLevelService.remove(id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: any,
+  ): Promise<void> {
+    const userId = req.user?.id;
+    return this.customerLevelService.remove(id, userId);
   }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, ParseIntPipe, UseGuards, Request } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -38,7 +38,8 @@ export class CategoryController {
 
   @Delete(':id')
   @ApiOperation({ summary: '删除分类' })
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    return this.categoryService.remove(id);
+  async remove(@Param('id', ParseIntPipe) id: number, @Request() req: any) {
+    const userId = req.user?.id;
+    return this.categoryService.remove(id, userId);
   }
 }

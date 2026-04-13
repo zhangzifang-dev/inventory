@@ -3,7 +3,9 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  UpdateDateColumn,
   ManyToOne,
+  Index,
 } from 'typeorm';
 import { PurchaseOrder } from './purchase-order.entity';
 import { Product } from './product.entity';
@@ -30,6 +32,13 @@ export class PurchaseOrderItem {
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @Index()
+  @Column({ name: 'deleted_at', type: 'datetime', nullable: true })
+  deletedAt: Date | null;
+
+  @Column({ name: 'deleted_by', nullable: true })
+  deletedBy: number;
 
   @ManyToOne(() => PurchaseOrder, (order) => order.items, { onDelete: 'CASCADE' })
   order: PurchaseOrder;
