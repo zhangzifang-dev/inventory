@@ -1,15 +1,23 @@
-import { Layout } from 'antd';
+import { Layout, Button } from 'antd';
 import { Outlet } from 'react-router-dom';
+import { useState } from 'react';
+import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import Header from './Header';
 import Sidebar from './Sidebar';
 
 const { Sider, Content } = Layout;
 
 const MainLayout = () => {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider
+        trigger={null}
+        collapsible
+        collapsed={collapsed}
         width={220}
+        collapsedWidth={80}
         style={{
           background: '#fff',
           borderRight: '1px solid #f0f0f0',
@@ -20,15 +28,28 @@ const MainLayout = () => {
             height: 64,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: collapsed ? 'center' : 'space-between',
+            padding: collapsed ? 0 : '0 16px',
             borderBottom: '1px solid #f0f0f0',
           }}
         >
-          <span style={{ fontSize: 18, fontWeight: 600, color: '#1890ff' }}>
-            进销存系统
-          </span>
+          {!collapsed && (
+            <span style={{ fontSize: 18, fontWeight: 600, color: '#1890ff' }}>
+              进销存系统
+            </span>
+          )}
+          <Button
+            type="text"
+            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+            onClick={() => setCollapsed(!collapsed)}
+            style={{
+              fontSize: '16px',
+              width: 40,
+              height: 40,
+            }}
+          />
         </div>
-        <Sidebar />
+        <Sidebar collapsed={collapsed} />
       </Sider>
       <Layout>
         <Header />
