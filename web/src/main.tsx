@@ -7,7 +7,14 @@ import './styles/global.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ConfigProvider locale={zhCN}>
+    <ConfigProvider 
+      locale={zhCN}
+      theme={{
+        token: {
+          fontSize: 13,
+        },
+      }}
+    >
       <App />
     </ConfigProvider>
   </React.StrictMode>,
