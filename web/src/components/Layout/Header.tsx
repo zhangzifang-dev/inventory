@@ -43,7 +43,7 @@ const Header = () => {
     <AntHeader
       style={{
         padding: '0 24px',
-        background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+        background: 'linear-gradient(90deg, #1890ff 0%, #40a9ff 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',

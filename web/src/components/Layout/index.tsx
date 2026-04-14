@@ -30,7 +30,7 @@ const MainLayout = () => {
             alignItems: 'center',
             justifyContent: collapsed ? 'center' : 'space-between',
             padding: collapsed ? 0 : '0 16px',
-            background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+            background: '#1890ff',
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
           }}
         >
