@@ -56,8 +56,8 @@ const Header = () => {
       </span>
       <Dropdown menu={{ items }} placement="bottomRight">
         <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-          <Avatar icon={<UserOutlined />} style={{ marginRight: 8, backgroundColor: 'rgba(255, 255, 255, 0.2)' }} />
-          <span style={{ color: '#fff' }}>{user?.name || '用户'}</span>
+          <Avatar size={16} icon={<UserOutlined />} style={{ marginRight: 4, backgroundColor: 'rgba(255, 255, 255, 0.2)' }} />
+          <span style={{ color: '#fff', fontSize: 10 }}>{user?.name || '用户'}</span>
         </div>
       </Dropdown>
     </AntHeader>
