@@ -73,7 +73,7 @@ export default function PurchaseOrders() {
     { title: '供应商', dataIndex: ['supplier', 'name'], key: 'supplier' },
     { title: '金额', dataIndex: 'totalAmount', key: 'totalAmount', width: 120, render: (v: number) => `¥${Number(v).toLocaleString()}` },
     { title: '状态', dataIndex: 'status', key: 'status', width: 100, render: (v: string) => getStatusTag(v) },
-    { title: '创建时间', dataIndex: 'createdAt', key: 'createdAt', width: 180, render: (v: string) => new Date(v).toLocaleString() },
+    { title: '创建时间', dataIndex: 'createdAt', key: 'createdAt', width: 110, render: (v: string) => new Date(v).toLocaleDateString() },
     { title: '操作', key: 'action', width: 100, render: (_: any, record: any) => (
       <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => handleView(record.id)}>查看</Button>
     )},
