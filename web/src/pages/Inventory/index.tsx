@@ -63,7 +63,7 @@ export default function Inventory() {
     { title: '状态', key: 'status', width: 100, render: (_: any, record: any) => (
       record.quantity <= record.warningQuantity ? <Tag color="red">库存不足</Tag> : <Tag color="green">正常</Tag>
     )},
-    { title: '更新时间', dataIndex: 'updatedAt', key: 'updatedAt', width: 180, render: (v: string) => new Date(v).toLocaleString() },
+    { title: '更新时间', dataIndex: 'updatedAt', key: 'updatedAt', width: 110, render: (v: string) => new Date(v).toLocaleDateString() },
     { title: '操作', key: 'action', width: 100, render: (_: any, record: any) => (
       <Button type="link" size="small" onClick={() => handleAdjust(record)}>调整</Button>
     )},
