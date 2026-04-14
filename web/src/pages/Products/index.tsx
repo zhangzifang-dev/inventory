@@ -56,7 +56,7 @@ export default function Products() {
   const columns = [
     { title: '#', key: 'index', width: 60, render: (_: any, __: any, index: number) => (pagination.current - 1) * pagination.pageSize + index + 1 },
     { title: 'SKU', dataIndex: 'sku', key: 'sku', width: 100 },
-    { title: '商品名称', dataIndex: 'name', key: 'name' },
+    { title: '商品名称', dataIndex: 'name', key: 'name', width: 200 },
     { title: '规格', dataIndex: 'spec', key: 'spec', width: 150 },
     { title: '单位', dataIndex: 'unit', key: 'unit', width: 60 },
     { title: '成本价', dataIndex: 'costPrice', key: 'costPrice', width: 100, render: (v: number) => `¥${Number(v).toFixed(2)}` },
