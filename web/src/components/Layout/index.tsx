@@ -25,7 +25,7 @@ const MainLayout = () => {
       >
         <div
           style={{
-            height: 56,
+            height: 28,
             display: 'flex',
             alignItems: 'center',
             justifyContent: collapsed ? 'center' : 'space-between',
@@ -35,7 +35,7 @@ const MainLayout = () => {
           }}
         >
           {!collapsed && (
-            <span style={{ fontSize: 18, fontWeight: 600, color: '#fff' }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>
               进销存系统
             </span>
           )}
@@ -44,9 +44,9 @@ const MainLayout = () => {
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             onClick={() => setCollapsed(!collapsed)}
             style={{
-              fontSize: '16px',
-              width: 40,
-              height: 40,
+              fontSize: '14px',
+              width: 28,
+              height: 28,
               color: '#fff',
             }}
           />

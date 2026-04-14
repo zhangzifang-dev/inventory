@@ -48,10 +48,10 @@ const Header = () => {
         alignItems: 'center',
         justifyContent: 'space-between',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-        height: 56,
+        height: 28,
       }}
     >
-      <span style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>
+      <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>
         {title}
       </span>
       <Dropdown menu={{ items }} placement="bottomRight">
