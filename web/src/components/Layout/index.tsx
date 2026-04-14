@@ -25,16 +25,17 @@ const MainLayout = () => {
       >
         <div
           style={{
-            height: 64,
+            height: 56,
             display: 'flex',
             alignItems: 'center',
             justifyContent: collapsed ? 'center' : 'space-between',
             padding: collapsed ? 0 : '0 16px',
-            borderBottom: '1px solid #f0f0f0',
+            background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
           }}
         >
           {!collapsed && (
-            <span style={{ fontSize: 18, fontWeight: 600, color: '#1890ff' }}>
+            <span style={{ fontSize: 18, fontWeight: 600, color: '#fff' }}>
               进销存系统
             </span>
           )}
@@ -46,6 +47,7 @@ const MainLayout = () => {
               fontSize: '16px',
               width: 40,
               height: 40,
+              color: '#fff',
             }}
           />
         </div>

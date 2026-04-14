@@ -43,20 +43,21 @@ const Header = () => {
     <AntHeader
       style={{
         padding: '0 24px',
-        background: '#fff',
+        background: 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        borderBottom: '1px solid #f0f0f0',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+        height: 56,
       }}
     >
-      <span style={{ fontSize: 18, fontWeight: 600 }}>
+      <span style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>
         {title}
       </span>
       <Dropdown menu={{ items }} placement="bottomRight">
         <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-          <Avatar icon={<UserOutlined />} style={{ marginRight: 8 }} />
-          <span>{user?.name || '用户'}</span>
+          <Avatar icon={<UserOutlined />} style={{ marginRight: 8, backgroundColor: 'rgba(255, 255, 255, 0.2)' }} />
+          <span style={{ color: '#fff' }}>{user?.name || '用户'}</span>
         </div>
       </Dropdown>
     </AntHeader>
