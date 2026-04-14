@@ -17,7 +17,7 @@ const MainLayout = () => {
         collapsible
         collapsed={collapsed}
         width={220}
-        collapsedWidth={80}
+        collapsedWidth={60}
         style={{
           background: '#fff',
         }}
