@@ -16,7 +16,7 @@ const MainLayout = () => {
         trigger={null}
         collapsible
         collapsed={collapsed}
-        width={220}
+        width={165}
         collapsedWidth={60}
         style={{
           background: '#fff',
