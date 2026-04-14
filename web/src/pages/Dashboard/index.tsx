@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Card, Row, Col, Statistic, Table, Tag, Radio, DatePicker, Select, Empty } from 'antd';
-import { ShoppingCartOutlined, UserOutlined, InboxOutlined } from '@ant-design/icons';
+import { ShoppingOutlined, TeamOutlined, UserSwitchOutlined, InboxOutlined } from '@ant-design/icons';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import dayjs from 'dayjs';
 import { productApi, supplierApi, customerApi, purchaseOrderApi, salesOrderApi, inventoryApi, reportApi } from '@/services/api';
@@ -135,16 +135,16 @@ export default function Dashboard() {
     <div>
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col span={6}>
-          <Card><Statistic title="商品总数" value={stats.products} prefix={<InboxOutlined />} loading={loading} /></Card>
+          <Card bodyStyle={{ padding: '12px 24px' }}><Statistic title="商品总数" value={stats.products} prefix={<ShoppingOutlined />} loading={loading} /></Card>
         </Col>
         <Col span={6}>
-          <Card><Statistic title="供应商" value={stats.suppliers} prefix={<UserOutlined />} loading={loading} /></Card>
+          <Card bodyStyle={{ padding: '12px 24px' }}><Statistic title="供应商" value={stats.suppliers} prefix={<TeamOutlined />} loading={loading} /></Card>
         </Col>
         <Col span={6}>
-          <Card><Statistic title="客户" value={stats.customers} prefix={<UserOutlined />} loading={loading} /></Card>
+          <Card bodyStyle={{ padding: '12px 24px' }}><Statistic title="客户" value={stats.customers} prefix={<UserSwitchOutlined />} loading={loading} /></Card>
         </Col>
         <Col span={6}>
-          <Card><Statistic title="库存预警" value={stats.lowStock} prefix={<ShoppingCartOutlined />} valueStyle={{ color: stats.lowStock > 0 ? '#cf1322' : '#3f8600' }} loading={loading} /></Card>
+          <Card bodyStyle={{ padding: '12px 24px' }}><Statistic title="库存预警" value={stats.lowStock} prefix={<InboxOutlined />} valueStyle={{ color: stats.lowStock > 0 ? '#cf1322' : '#3f8600' }} loading={loading} /></Card>
         </Col>
       </Row>
 
