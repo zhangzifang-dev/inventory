@@ -58,7 +58,7 @@ export default function Products() {
     { title: 'SKU', dataIndex: 'sku', key: 'sku', width: 100 },
     { title: '商品名称', dataIndex: 'name', key: 'name', width: 200 },
     { title: '规格', dataIndex: 'spec', key: 'spec', width: 150 },
-    { title: '单位', dataIndex: 'unit', key: 'unit', width: 60 },
+    { title: '单位', dataIndex: 'unit', key: 'unit', width: 70 },
     { title: '成本价', dataIndex: 'costPrice', key: 'costPrice', width: 100, render: (v: number) => `¥${Number(v).toFixed(2)}` },
     { title: '售价', dataIndex: 'salePrice', key: 'salePrice', width: 100, render: (v: number) => `¥${Number(v).toFixed(2)}` },
     { title: '状态', dataIndex: 'status', key: 'status', width: 80, render: (v: boolean) => v ? '启用' : '禁用' },
