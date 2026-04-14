@@ -45,7 +45,7 @@ export default function Dashboard() {
         products: productsRes.data?.total || 0,
         suppliers: suppliersRes.data?.total || 0,
         customers: customersRes.data?.total || 0,
-        lowStock: lowStockRes.data?.total || 0,
+        lowStock: lowStockRes.data?.length || 0,
       });
       setPurchaseOrders(purchaseRes.data?.list || []);
       setSalesOrders(salesRes.data?.list || []);
