@@ -61,7 +61,7 @@ export default function Categories() {
     { title: 'ID', dataIndex: 'id', key: 'id', width: 80 },
     { title: '分类名称', dataIndex: 'name', key: 'name' },
     { title: '排序', dataIndex: 'sort', key: 'sort', width: 80 },
-    { title: '创建时间', dataIndex: 'createdAt', key: 'createdAt', width: 180, render: (v: string) => new Date(v).toLocaleString() },
+    { title: '创建时间', dataIndex: 'createdAt', key: 'createdAt', width: 110, render: (v: string) => new Date(v).toLocaleDateString() },
     { title: '操作', key: 'action', width: 150, render: (_: any, record: Category) => (
       <Space>
         <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)}>编辑</Button>

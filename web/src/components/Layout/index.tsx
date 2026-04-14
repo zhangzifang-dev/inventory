@@ -20,7 +20,6 @@ const MainLayout = () => {
         collapsedWidth={80}
         style={{
           background: '#fff',
-          borderRight: '1px solid #f0f0f0',
         }}
       >
         <div
@@ -30,8 +29,7 @@ const MainLayout = () => {
             alignItems: 'center',
             justifyContent: collapsed ? 'center' : 'space-between',
             padding: collapsed ? 0 : '0 16px',
-            background: '#1890ff',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+            background: 'linear-gradient(90deg, #096dd9 0%, #1890ff 100%)',
           }}
         >
           {!collapsed && (
