@@ -135,6 +135,9 @@ export default function Dashboard() {
     <div>
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col span={6}>
+          <Card bodyStyle={{ padding: '12px 24px' }}><Statistic title="库存预警" value={stats.lowStock} prefix={<InboxOutlined />} valueStyle={{ color: stats.lowStock > 0 ? '#cf1322' : '#3f8600' }} loading={loading} /></Card>
+        </Col>
+        <Col span={6}>
           <Card bodyStyle={{ padding: '12px 24px' }}><Statistic title="商品总数" value={stats.products} prefix={<ShoppingOutlined />} loading={loading} /></Card>
         </Col>
         <Col span={6}>
@@ -142,9 +145,6 @@ export default function Dashboard() {
         </Col>
         <Col span={6}>
           <Card bodyStyle={{ padding: '12px 24px' }}><Statistic title="客户" value={stats.customers} prefix={<UserSwitchOutlined />} loading={loading} /></Card>
-        </Col>
-        <Col span={6}>
-          <Card bodyStyle={{ padding: '12px 24px' }}><Statistic title="库存预警" value={stats.lowStock} prefix={<InboxOutlined />} valueStyle={{ color: stats.lowStock > 0 ? '#cf1322' : '#3f8600' }} loading={loading} /></Card>
         </Col>
       </Row>
 
