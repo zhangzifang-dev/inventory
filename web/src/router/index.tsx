@@ -12,6 +12,7 @@ const Suppliers = lazy(() => import('@/pages/Suppliers'));
 const Customers = lazy(() => import('@/pages/Customers'));
 const PurchaseOrders = lazy(() => import('@/pages/PurchaseOrders'));
 const SalesOrders = lazy(() => import('@/pages/SalesOrders'));
+const POS = lazy(() => import('@/pages/POS'));
 const Inventory = lazy(() => import('@/pages/Inventory'));
 const Users = lazy(() => import('@/pages/Users'));
 
@@ -35,6 +36,7 @@ const Router = () => {
           <Route path="customers" element={<Customers />} />
           <Route path="purchase-orders" element={<PurchaseOrders />} />
           <Route path="sales-orders" element={<SalesOrders />} />
+          <Route path="pos" element={<POS />} />
           <Route path="inventory" element={<Inventory />} />
           <Route path="users" element={<Users />} />
         </Route>
