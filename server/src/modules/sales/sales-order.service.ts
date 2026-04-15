@@ -7,8 +7,10 @@ import { Product } from '../../entities/product.entity';
 import { Customer } from '../../entities/customer.entity';
 import { CustomerLevel } from '../../entities/customer-level.entity';
 import { Inventory } from '../../entities/inventory.entity';
+import { InventoryLog, InventoryLogType } from '../../entities/inventory-log.entity';
 import { CreateSalesOrderDto } from './dto/create-sales-order.dto';
 import { UpdateSalesOrderDto } from './dto/update-sales-order.dto';
+import { UpdateSalesOrderStatusDto } from './dto/update-sales-order-status.dto';
 import { QuerySalesOrderDto } from './dto/query-sales-order.dto';
 import { PaginatedResponseDto } from '../../common/dto/response.dto';
 
@@ -181,5 +183,88 @@ export class SalesOrderService {
     order.deletedAt = new Date();
     order.deletedBy = userId;
     await this.salesOrderRepository.save(order);
+  }
+
+  async updateStatus(id: number, dto: UpdateSalesOrderStatusDto, userId: number): Promise<SalesOrder> {
+    const order = await this.salesOrderRepository.findOne({
+      where: { id, deletedAt: IsNull() },
+      relations: ['items', 'items.product'],
+    });
+
+    if (!order) {
+      throw new NotFoundException('销售订单不存在');
+    }
+
+    if (order.status === SalesOrderStatus.COMPLETED) {
+      throw new BadRequestException('订单已完成，无法修改状态');
+    }
+
+    if (order.status === SalesOrderStatus.CANCELLED) {
+      throw new BadRequestException('订单已取消，无法修改状态');
+    }
+
+    if (dto.status === SalesOrderStatus.COMPLETED) {
+      const queryRunner = this.dataSource.createQueryRunner();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      try {
+        for (const item of order.items) {
+          const inventory = await queryRunner.manager.findOne(Inventory, {
+            where: { productId: item.productId, deletedAt: IsNull() },
+          });
+
+          if (!inventory || inventory.quantity < Number(item.quantity)) {
+            throw new BadRequestException(
+              `商品【${item.product.name}】库存不足，当前库存：${inventory?.quantity || 0}，需要：${item.quantity}`
+            );
+          }
+        }
+
+        for (const item of order.items) {
+          await queryRunner.manager.decrement(
+            Inventory,
+            { productId: item.productId },
+            'quantity',
+            Number(item.quantity)
+          );
+
+          const inventory = await queryRunner.manager.findOne(Inventory, {
+            where: { productId: item.productId },
+          });
+
+          if (!inventory) {
+            throw new BadRequestException(`商品库存记录不存在`);
+          }
+
+          const log = queryRunner.manager.create(InventoryLog, {
+            productId: item.productId,
+            type: InventoryLogType.SALES,
+            quantity: Number(item.quantity),
+            beforeQty: Number(inventory.quantity) + Number(item.quantity),
+            afterQty: Number(inventory.quantity),
+            orderId: order.id,
+            remark: `销售订单 ${order.orderNo}`,
+            createdById: userId,
+          });
+          await queryRunner.manager.save(log);
+        }
+
+        order.status = dto.status;
+        await queryRunner.manager.save(order);
+
+        await queryRunner.commitTransaction();
+      } catch (err) {
+        await queryRunner.rollbackTransaction();
+        throw err;
+      } finally {
+        await queryRunner.release();
+      }
+    } else {
+      order.status = dto.status;
+      await this.salesOrderRepository.save(order);
+    }
+
+    return this.findOne(id);
   }
 }
