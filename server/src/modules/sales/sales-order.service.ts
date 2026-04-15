@@ -112,10 +112,17 @@ export class SalesOrderService {
       finalAmount,
       status: dto.status || SalesOrderStatus.DRAFT,
       createdById: userId,
-      items,
     });
 
-    return this.salesOrderRepository.save(order);
+    const savedOrder = await this.salesOrderRepository.save(order);
+
+    for (const item of items) {
+      item.orderId = savedOrder.id;
+    }
+    await this.salesOrderItemRepository.save(items);
+    savedOrder.items = items;
+
+    return savedOrder;
   }
 
   async findAll(query: QuerySalesOrderDto): Promise<PaginatedResponseDto<SalesOrder>> {
