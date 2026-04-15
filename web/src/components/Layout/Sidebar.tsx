@@ -9,6 +9,7 @@ import {
   UserOutlined,
   AppstoreOutlined,
   UserSwitchOutlined,
+  DollarOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useUserStore } from '@/stores/useUserStore';
@@ -32,6 +33,7 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
     { key: '/suppliers', icon: <TeamOutlined />, label: '供应商管理' },
     { key: '/customers', icon: <UserSwitchOutlined />, label: '客户管理' },
     { key: '/purchase-orders', icon: <ShoppingCartOutlined />, label: '采购订单' },
+    { key: '/pos', icon: <DollarOutlined />, label: '销售' },
     { key: '/sales-orders', icon: <ShopOutlined />, label: '销售订单' },
     { key: '/inventory', icon: <InboxOutlined />, label: '库存管理' },
   ];
