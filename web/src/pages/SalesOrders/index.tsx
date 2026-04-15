@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Table, Button, Modal, Card, Tag, Descriptions, Badge, Form, Input, Select, message, InputNumber, Space, Divider } from 'antd';
+import { Table, Button, Modal, Card, Tag, Descriptions, Badge, Form, Input, Select, message, InputNumber, Space, Divider, Popconfirm } from 'antd';
 import { PlusOutlined, EyeOutlined, SearchOutlined, DeleteOutlined } from '@ant-design/icons';
 import { salesOrderApi, customerApi, productApi, inventoryApi } from '@/services/api';
 
@@ -56,6 +56,16 @@ export default function SalesOrders() {
   };
 
   const handleView = async (id: number) => { const res = await salesOrderApi.get(id); setCurrentOrder(res.data); setDetailVisible(true); };
+
+  const handleComplete = async (id: number) => {
+    try {
+      await salesOrderApi.updateStatus(id, 'completed');
+      message.success('订单已完成');
+      loadData(pagination.current, pagination.pageSize, filterForm.getFieldsValue());
+    } catch (err: any) {
+      message.error(err.response?.data?.message || '操作失败');
+    }
+  };
 
   const handleCreate = () => {
     createForm.resetFields();
@@ -161,8 +171,15 @@ export default function SalesOrders() {
     { title: '折扣', dataIndex: 'discountAmount', key: 'discountAmount', width: 100, render: (v: number) => v ? `¥${Number(v).toLocaleString()}` : '-' },
     { title: '实付金额', dataIndex: 'finalAmount', key: 'finalAmount', width: 120, render: (v: number) => `¥${Number(v).toLocaleString()}` },
     { title: '状态', dataIndex: 'status', key: 'status', width: 100, render: (v: string) => getStatusTag(v) },
-    { title: '操作', key: 'action', width: 100, render: (_: any, record: any) => (
-      <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => handleView(record.id)}>查看</Button>
+    { title: '操作', key: 'action', width: 160, render: (_: any, record: any) => (
+      <Space>
+        <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => handleView(record.id)}>查看</Button>
+        {(record.status === 'draft' || record.status === 'pending') && (
+          <Popconfirm title="确定完成订单？库存将自动扣减。" onConfirm={() => handleComplete(record.id)}>
+            <Button type="link" size="small">完成</Button>
+          </Popconfirm>
+        )}
+      </Space>
     )},
   ];
 
