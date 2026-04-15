@@ -45,6 +45,7 @@ export const salesOrderApi = {
   create: (data: any) => request.post('/sales-orders', data),
   update: (id: number, data: any) => request.put(`/sales-orders/${id}`, data),
   delete: (id: number) => request.delete(`/sales-orders/${id}`),
+  updateStatus: (id: number, status: string) => request.put(`/sales-orders/${id}/status`, { status }),
 };
 
 export const inventoryApi = {
