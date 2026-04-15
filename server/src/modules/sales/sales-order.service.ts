@@ -6,6 +6,7 @@ import { SalesOrderItem } from '../../entities/sales-order-item.entity';
 import { Product } from '../../entities/product.entity';
 import { Customer } from '../../entities/customer.entity';
 import { CustomerLevel } from '../../entities/customer-level.entity';
+import { Inventory } from '../../entities/inventory.entity';
 import { CreateSalesOrderDto } from './dto/create-sales-order.dto';
 import { UpdateSalesOrderDto } from './dto/update-sales-order.dto';
 import { QuerySalesOrderDto } from './dto/query-sales-order.dto';
@@ -24,6 +25,8 @@ export class SalesOrderService {
     private customerRepository: Repository<Customer>,
     @InjectRepository(CustomerLevel)
     private customerLevelRepository: Repository<CustomerLevel>,
+    @InjectRepository(Inventory)
+    private inventoryRepository: Repository<Inventory>,
     private dataSource: DataSource,
   ) {}
 
@@ -44,6 +47,18 @@ export class SalesOrderService {
 
     if (!customer) {
       throw new BadRequestException('客户不存在');
+    }
+
+    // 检查库存
+    for (const itemDto of dto.items) {
+      const inventory = await this.inventoryRepository.findOne({
+        where: { productId: itemDto.productId, deletedAt: IsNull() },
+      });
+      const currentStock = inventory?.quantity || 0;
+      if (itemDto.quantity > currentStock) {
+        const product = await this.productRepository.findOne({ where: { id: itemDto.productId } });
+        throw new BadRequestException(`商品"${product?.name || itemDto.productId}"库存不足，当前库存: ${currentStock}`);
+      }
     }
 
     let totalAmount = 0;

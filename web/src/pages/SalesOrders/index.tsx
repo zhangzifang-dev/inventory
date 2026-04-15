@@ -1,18 +1,23 @@
 import { useEffect, useState } from 'react';
-import { Table, Button, Modal, Card, Tag, Descriptions, Badge, Form, Input, Select } from 'antd';
-import { EyeOutlined, SearchOutlined } from '@ant-design/icons';
-import { salesOrderApi, customerApi, productApi } from '@/services/api';
+import { Table, Button, Modal, Card, Tag, Descriptions, Badge, Form, Input, Select, message, InputNumber, Space, Divider } from 'antd';
+import { PlusOutlined, EyeOutlined, SearchOutlined, DeleteOutlined } from '@ant-design/icons';
+import { salesOrderApi, customerApi, productApi, inventoryApi } from '@/services/api';
 
 export default function SalesOrders() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [customers, setCustomers] = useState<any[]>([]);
-  const [, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [inventoryMap, setInventoryMap] = useState<Map<number, number>>(new Map());
   const [detailVisible, setDetailVisible] = useState(false);
+  const [createVisible, setCreateVisible] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<any>(null);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
   const [filterForm] = Form.useForm();
+  const [createForm] = Form.useForm();
   const [filterCount, setFilterCount] = useState(0);
+  const [orderItems, setOrderItems] = useState<any[]>([]);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => { loadData(); loadCustomers(); loadProducts(); }, []);
 
@@ -30,7 +35,17 @@ export default function SalesOrders() {
   };
 
   const loadCustomers = async () => { const res = await customerApi.list({ pageSize: 100 }); setCustomers(res.data?.list || []); };
-  const loadProducts = async () => { const res = await productApi.list({ pageSize: 100 }); setProducts(res.data?.list || []); };
+  
+  const loadProducts = async () => { 
+    const res = await productApi.list({ pageSize: 100, status: true }); 
+    setProducts(res.data?.list || []);
+    const invRes = await inventoryApi.list({ pageSize: 1000 });
+    const map = new Map<number, number>();
+    (invRes.data?.list || []).forEach((inv: any) => {
+      map.set(inv.productId, inv.quantity);
+    });
+    setInventoryMap(map);
+  };
 
   const handleSearch = () => {
     const values = filterForm.getFieldsValue();
@@ -41,6 +56,91 @@ export default function SalesOrders() {
   };
 
   const handleView = async (id: number) => { const res = await salesOrderApi.get(id); setCurrentOrder(res.data); setDetailVisible(true); };
+
+  const handleCreate = () => {
+    createForm.resetFields();
+    setOrderItems([]);
+    setCreateVisible(true);
+  };
+
+  const handleAddItem = () => {
+    const newItems = [...orderItems, { productId: undefined, quantity: 1, unitPrice: 0, discountRate: 0, key: Date.now() }];
+    setOrderItems(newItems);
+  };
+
+  const handleRemoveItem = (key: number) => {
+    setOrderItems(orderItems.filter(item => item.key !== key));
+  };
+
+  const handleItemChange = (key: number, field: string, value: any) => {
+    const newItems = orderItems.map(item => {
+      if (item.key === key) {
+        const updated = { ...item, [field]: value };
+        if (field === 'productId') {
+          const product = products.find(p => p.id === value);
+          if (product) {
+            updated.unitPrice = product.salePrice;
+          }
+        }
+        return updated;
+      }
+      return item;
+    });
+    setOrderItems(newItems);
+  };
+
+  const calculateTotal = () => {
+    let total = 0;
+    orderItems.forEach(item => {
+      total += (item.quantity || 0) * (item.unitPrice || 0) * (1 - (item.discountRate || 0) / 100);
+    });
+    return total;
+  };
+
+  const handleSubmit = async (status: 'draft' | 'pending') => {
+    if (!createForm.getFieldValue('customerId')) {
+      message.error('请选择客户');
+      return;
+    }
+    if (orderItems.length === 0) {
+      message.error('请添加商品');
+      return;
+    }
+    for (const item of orderItems) {
+      if (!item.productId || !item.quantity || !item.unitPrice) {
+        message.error('请完善商品信息');
+        return;
+      }
+      const stock = inventoryMap.get(item.productId) || 0;
+      if (item.quantity > stock) {
+        const product = products.find(p => p.id === item.productId);
+        message.error(`商品"${product?.name}"库存不足，当前库存: ${stock}`);
+        return;
+      }
+    }
+
+    setSubmitting(true);
+    try {
+      const dto = {
+        customerId: createForm.getFieldValue('customerId'),
+        status,
+        items: orderItems.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          discountRate: item.discountRate || 0,
+        })),
+      };
+      await salesOrderApi.create(dto);
+      message.success(status === 'draft' ? '订单已保存为草稿' : '订单已提交审批');
+      setCreateVisible(false);
+      handleSearch();
+    } catch (error) {
+      console.error('Failed to create order:', error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const getStatusTag = (status: string) => {
     const map: Record<string, { color: string; text: string }> = {
@@ -69,26 +169,29 @@ export default function SalesOrders() {
   return (
     <Card 
       extra={
-        <Form form={filterForm} layout="inline" style={{ gap: 8 }}>
-          <Form.Item name="orderNo">
-            <Input placeholder="订单号" allowClear style={{ width: 120 }} />
-          </Form.Item>
-          <Form.Item name="customerId">
-            <Select placeholder="客户" allowClear style={{ width: 120 }} options={customers.map(c => ({ label: c.name, value: c.id }))} />
-          </Form.Item>
-          <Form.Item name="status" initialValue="all">
-            <Select style={{ width: 90 }} options={[
-              { label: '全部', value: 'all' },
-              { label: '草稿', value: 'draft' },
-              { label: '待审批', value: 'pending' },
-              { label: '已完成', value: 'completed' },
-              { label: '已取消', value: 'cancelled' },
-            ]} />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>查询{filterCount > 0 && <Badge count={filterCount} style={{ marginLeft: 4 }} />}</Button>
-          </Form.Item>
-        </Form>
+        <Space>
+          <Form form={filterForm} layout="inline" style={{ gap: 8 }}>
+            <Form.Item name="orderNo">
+              <Input placeholder="订单号" allowClear style={{ width: 120 }} />
+            </Form.Item>
+            <Form.Item name="customerId">
+              <Select placeholder="客户" allowClear style={{ width: 120 }} options={customers.map(c => ({ label: c.name, value: c.id }))} />
+            </Form.Item>
+            <Form.Item name="status" initialValue="all">
+              <Select style={{ width: 90 }} options={[
+                { label: '全部', value: 'all' },
+                { label: '草稿', value: 'draft' },
+                { label: '待审批', value: 'pending' },
+                { label: '已完成', value: 'completed' },
+                { label: '已取消', value: 'cancelled' },
+              ]} />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>查询{filterCount > 0 && <Badge count={filterCount} style={{ marginLeft: 4 }} />}</Button>
+            </Form.Item>
+          </Form>
+          <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>新增销售</Button>
+        </Space>
       }
     >
       <Table columns={columns} dataSource={data} rowKey="id" loading={loading} pagination={{ ...pagination, onChange: (page, pageSize) => loadData(page, pageSize, filterForm.getFieldsValue()) }} />
@@ -103,6 +206,73 @@ export default function SalesOrders() {
             <Descriptions.Item label="实付金额">¥{Number(currentOrder.finalAmount).toLocaleString()}</Descriptions.Item>
           </Descriptions>
         )}
+      </Modal>
+      <Modal title="新增销售订单" open={createVisible} onCancel={() => setCreateVisible(false)} width={800} footer={null}>
+        <Form form={createForm} layout="vertical">
+          <Form.Item name="customerId" label="客户" rules={[{ required: true, message: '请选择客户' }]}>
+            <Select placeholder="请选择客户" options={customers.map(c => ({ label: c.name, value: c.id }))} />
+          </Form.Item>
+          <Divider>商品列表</Divider>
+          {orderItems.map((item) => {
+            const stock = item.productId ? inventoryMap.get(item.productId) : undefined;
+            const isLowStock = stock !== undefined && item.quantity > stock;
+            return (
+              <div key={item.key} style={{ marginBottom: 16, padding: 12, border: '1px solid #f0f0f0', borderRadius: 4 }}>
+                <Space wrap style={{ width: '100%', justifyContent: 'space-between' }}>
+                  <Select
+                    placeholder="选择商品"
+                    style={{ width: 200 }}
+                    value={item.productId}
+                    onChange={(v) => handleItemChange(item.key, 'productId', v)}
+                    options={products.map(p => ({ 
+                      label: `${p.name} (库存: ${inventoryMap.get(p.id) || 0})`, 
+                      value: p.id 
+                    }))}
+                  />
+                  <InputNumber
+                    placeholder="数量"
+                    min={1}
+                    value={item.quantity}
+                    onChange={(v) => handleItemChange(item.key, 'quantity', v)}
+                    style={{ width: 80 }}
+                    status={isLowStock ? 'error' : undefined}
+                  />
+                  <InputNumber
+                    placeholder="单价"
+                    min={0}
+                    precision={2}
+                    value={item.unitPrice}
+                    onChange={(v) => handleItemChange(item.key, 'unitPrice', v)}
+                    style={{ width: 100 }}
+                  />
+                  <InputNumber
+                    placeholder="折扣%"
+                    min={0}
+                    max={100}
+                    value={item.discountRate}
+                    onChange={(v) => handleItemChange(item.key, 'discountRate', v)}
+                    style={{ width: 80 }}
+                    addonAfter="%"
+                  />
+                  <span>小计: ¥{((item.quantity || 0) * (item.unitPrice || 0) * (1 - (item.discountRate || 0) / 100)).toFixed(2)}</span>
+                  <Button type="text" danger icon={<DeleteOutlined />} onClick={() => handleRemoveItem(item.key)} />
+                </Space>
+                {isLowStock && <div style={{ color: '#ff4d4f', fontSize: 12, marginTop: 4 }}>库存不足，当前库存: {stock}</div>}
+              </div>
+            );
+          })}
+          <Button type="dashed" onClick={handleAddItem} style={{ width: '100%' }}>+ 添加商品</Button>
+          <Divider />
+          <div style={{ textAlign: 'right', fontSize: 16, marginBottom: 16 }}>
+            <span>合计: </span>
+            <span style={{ fontWeight: 600, color: '#1890ff' }}>¥{calculateTotal().toFixed(2)}</span>
+          </div>
+          <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
+            <Button onClick={() => setCreateVisible(false)}>取消</Button>
+            <Button onClick={() => handleSubmit('draft')} loading={submitting}>保存草稿</Button>
+            <Button type="primary" onClick={() => handleSubmit('pending')} loading={submitting}>提交审批</Button>
+          </Space>
+        </Form>
       </Modal>
     </Card>
   );

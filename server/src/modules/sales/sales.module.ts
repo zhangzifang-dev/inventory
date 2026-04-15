@@ -11,9 +11,10 @@ import { Customer } from '../../entities/customer.entity';
 import { SalesOrder } from '../../entities/sales-order.entity';
 import { SalesOrderItem } from '../../entities/sales-order-item.entity';
 import { Product } from '../../entities/product.entity';
+import { Inventory } from '../../entities/inventory.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CustomerLevel, Customer, SalesOrder, SalesOrderItem, Product])],
+  imports: [TypeOrmModule.forFeature([CustomerLevel, Customer, SalesOrder, SalesOrderItem, Product, Inventory])],
   controllers: [CustomerLevelController, CustomerController, SalesOrderController],
   providers: [CustomerLevelService, CustomerService, SalesOrderService],
   exports: [CustomerLevelService, CustomerService, SalesOrderService],
