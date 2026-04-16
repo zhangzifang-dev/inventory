@@ -229,6 +229,7 @@ export default function SalesOrders() {
               pagination={false}
               dataSource={currentOrder.items || []}
               rowKey="id"
+              scroll={{ y: 300 }}
               columns={[
                 { title: '商品名称', dataIndex: ['product', 'name'], key: 'name' },
                 { title: '规格', dataIndex: ['product', 'spec'], key: 'spec', render: (v: string) => v || '-' },
