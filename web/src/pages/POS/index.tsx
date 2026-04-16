@@ -133,9 +133,14 @@ export default function POS() {
   };
 
   const productColumns = [
-    { title: '商品名称', dataIndex: 'name', key: 'name', width: 150, ellipsis: true },
-    { title: 'SKU', dataIndex: 'sku', key: 'sku', width: 80 },
-    { title: '售价', dataIndex: 'salePrice', key: 'salePrice', width: 80, render: (v: number) => `¥${Number(v).toFixed(2)}` },
+    { 
+      title: '操作', 
+      key: 'action', 
+      width: 60, 
+      render: (_: any, record: any) => (
+        <Button type="link" size="small" icon={<PlusOutlined />} onClick={() => addToOrder(record)} />
+      )
+    },
     { 
       title: '库存', 
       key: 'stock', 
@@ -145,14 +150,9 @@ export default function POS() {
         return <Tag color={qty <= 10 ? 'red' : 'green'}>{qty}</Tag>;
       }
     },
-    { 
-      title: '操作', 
-      key: 'action', 
-      width: 60, 
-      render: (_: any, record: any) => (
-        <Button type="link" size="small" icon={<PlusOutlined />} onClick={() => addToOrder(record)} />
-      )
-    },
+    { title: '商品名称', dataIndex: 'name', key: 'name', width: 150, ellipsis: true },
+    { title: 'SKU', dataIndex: 'sku', key: 'sku', width: 80 },
+    { title: '售价', dataIndex: 'salePrice', key: 'salePrice', width: 80, render: (v: number) => `¥${Number(v).toFixed(2)}` },
   ];
 
   const orderColumns = [
