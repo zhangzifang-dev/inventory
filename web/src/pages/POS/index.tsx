@@ -186,7 +186,7 @@ export default function POS() {
   return (
     <div style={{ height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column' }}>
       <Card size="small" style={{ marginBottom: 8 }}>
-        <Row gutter={16} align="middle" justify="space-between">
+        <Row gutter={16} align="middle">
           <Col>
             <Space>
               <span>客户:</span>
@@ -212,7 +212,7 @@ export default function POS() {
               style={{ width: 300 }}
             />
           </Col>
-          <Col>
+          <Col flex="auto" style={{ textAlign: 'right' }}>
             <Space>
               <Button onClick={() => handleSubmit(true)} disabled={orderItems.length === 0}>
                 保存草稿
