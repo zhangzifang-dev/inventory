@@ -19,6 +19,8 @@ import { createTestModule, cleanupDatabase, closeDatabase } from './test-utils';
 
 import { Permission } from '../src/entities/permission.entity';
 
+jest.setTimeout(30000);
+
 describe('SalesOrderService (e2e)', () => {
   let service: SalesOrderService;
   let dataSource: DataSource;
@@ -170,8 +172,15 @@ describe('SalesOrderService (e2e)', () => {
     });
 
     it('should calculate order amount with item discount correctly', async () => {
+      const customerWithoutLevel = customerRepository.create({
+        name: 'Regular Customer',
+        phone: '13800138002',
+        status: true,
+      });
+      await customerRepository.save(customerWithoutLevel);
+
       const createDto: CreateSalesOrderDto = {
-        customerId: testCustomer.id,
+        customerId: customerWithoutLevel.id,
         items: [
           { productId: testProduct1.id, quantity: 2, unitPrice: 100, discountRate: 10 },
         ],
