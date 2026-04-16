@@ -216,35 +216,15 @@ export default function POS() {
       </Card>
 
       <div style={{ flex: 1, display: 'flex', gap: 8, overflow: 'hidden' }}>
-        <Card title="商品列表" size="small" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ marginBottom: 8 }}>
-            <Input
-              placeholder="搜索商品"
-              prefix={<SearchOutlined />}
-              value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
-              allowClear
-            />
-          </div>
-          <div style={{ flex: 1, overflow: 'auto' }}>
-            <Table
-              columns={productColumns}
-              dataSource={filteredProducts}
-              rowKey="id"
-              size="small"
-              pagination={false}
-            />
-          </div>
-        </Card>
-
-        <Card title="当前订单" size="small" style={{ width: 400, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ flex: 1, overflow: 'auto' }}>
+        <Card title="当前订单" size="small" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ flex: 1, overflow: 'hidden' }}>
             <Table
               columns={orderColumns}
               dataSource={orderItems}
               rowKey="productId"
               size="small"
               pagination={false}
+              scroll={{ y: 'calc(100vh - 320px)' }}
               locale={{ emptyText: '暂无商品' }}
             />
           </div>
@@ -265,6 +245,28 @@ export default function POS() {
                 提交订单
               </Button>
             </Space>
+          </div>
+        </Card>
+
+        <Card title="商品列表" size="small" style={{ width: 400, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ marginBottom: 8 }}>
+            <Input
+              placeholder="搜索商品"
+              prefix={<SearchOutlined />}
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              allowClear
+            />
+          </div>
+          <div style={{ flex: 1, overflow: 'hidden' }}>
+            <Table
+              columns={productColumns}
+              dataSource={filteredProducts}
+              rowKey="id"
+              size="small"
+              pagination={false}
+              scroll={{ y: 'calc(100vh - 260px)' }}
+            />
           </div>
         </Card>
       </div>
