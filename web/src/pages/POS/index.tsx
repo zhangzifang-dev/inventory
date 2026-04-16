@@ -186,7 +186,7 @@ export default function POS() {
   return (
     <div style={{ height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column' }}>
       <Card size="small" style={{ marginBottom: 8 }}>
-        <Row gutter={16} align="middle">
+        <Row gutter={16} align="middle" justify="space-between">
           <Col>
             <Space>
               <span>客户:</span>
@@ -201,7 +201,7 @@ export default function POS() {
               />
             </Space>
           </Col>
-          <Col flex="auto">
+          <Col>
             <Input
               ref={inputRef}
               placeholder="扫码或输入商品名称/SKU/条码"
@@ -211,6 +211,16 @@ export default function POS() {
               onPressEnter={() => handleScanOrSearch(searchKeyword)}
               style={{ width: 300 }}
             />
+          </Col>
+          <Col>
+            <Space>
+              <Button onClick={() => handleSubmit(true)} disabled={orderItems.length === 0}>
+                保存草稿
+              </Button>
+              <Button type="primary" onClick={() => handleSubmit(false)} loading={loading} disabled={orderItems.length === 0}>
+                提交订单
+              </Button>
+            </Space>
           </Col>
         </Row>
       </Card>
@@ -233,18 +243,10 @@ export default function POS() {
               <Col>小计:</Col>
               <Col>¥{totalAmount.toFixed(2)}</Col>
             </Row>
-            <Row justify="space-between" style={{ marginBottom: 16 }}>
+            <Row justify="space-between">
               <Col><strong>应付:</strong></Col>
               <Col><strong style={{ fontSize: 18, color: '#f5222d' }}>¥{totalAmount.toFixed(2)}</strong></Col>
             </Row>
-            <Space style={{ width: '100%' }} direction="vertical">
-              <Button block onClick={() => handleSubmit(true)} disabled={orderItems.length === 0}>
-                保存草稿
-              </Button>
-              <Button type="primary" block onClick={() => handleSubmit(false)} loading={loading} disabled={orderItems.length === 0}>
-                提交订单
-              </Button>
-            </Space>
           </div>
         </Card>
 
