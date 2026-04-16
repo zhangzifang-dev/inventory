@@ -212,16 +212,35 @@ export default function SalesOrders() {
       }
     >
       <Table columns={columns} dataSource={data} rowKey="id" loading={loading} pagination={{ ...pagination, onChange: (page, pageSize) => loadData(page, pageSize, filterForm.getFieldsValue()) }} />
-      <Modal title="销售订单详情" open={detailVisible} onCancel={() => setDetailVisible(false)} footer={null} width={700}>
+      <Modal title="销售订单详情" open={detailVisible} onCancel={() => setDetailVisible(false)} footer={null} width={900}>
         {currentOrder && (
-          <Descriptions bordered column={2}>
-            <Descriptions.Item label="订单号">{currentOrder.orderNo}</Descriptions.Item>
-            <Descriptions.Item label="状态">{getStatusTag(currentOrder.status)}</Descriptions.Item>
-            <Descriptions.Item label="客户">{currentOrder.customer?.name}</Descriptions.Item>
-            <Descriptions.Item label="总金额">¥{Number(currentOrder.totalAmount).toLocaleString()}</Descriptions.Item>
-            <Descriptions.Item label="折扣">¥{Number(currentOrder.discountAmount).toLocaleString()}</Descriptions.Item>
-            <Descriptions.Item label="实付金额">¥{Number(currentOrder.finalAmount).toLocaleString()}</Descriptions.Item>
-          </Descriptions>
+          <>
+            <Descriptions bordered column={2}>
+              <Descriptions.Item label="订单号">{currentOrder.orderNo}</Descriptions.Item>
+              <Descriptions.Item label="状态">{getStatusTag(currentOrder.status)}</Descriptions.Item>
+              <Descriptions.Item label="客户">{currentOrder.customer?.name}</Descriptions.Item>
+              <Descriptions.Item label="总金额">¥{Number(currentOrder.totalAmount).toLocaleString()}</Descriptions.Item>
+              <Descriptions.Item label="折扣">¥{Number(currentOrder.discountAmount).toLocaleString()}</Descriptions.Item>
+              <Descriptions.Item label="实付金额">¥{Number(currentOrder.finalAmount).toLocaleString()}</Descriptions.Item>
+            </Descriptions>
+            <Divider>商品明细</Divider>
+            <Table
+              size="small"
+              pagination={false}
+              dataSource={currentOrder.items || []}
+              rowKey="id"
+              columns={[
+                { title: '商品名称', dataIndex: ['product', 'name'], key: 'name' },
+                { title: '规格', dataIndex: ['product', 'spec'], key: 'spec', render: (v: string) => v || '-' },
+                { title: '单位', dataIndex: ['product', 'unit'], key: 'unit', width: 60, render: (v: string) => v || '-' },
+                { title: '数量', dataIndex: 'quantity', key: 'quantity', width: 60 },
+                { title: '单价', dataIndex: 'unitPrice', key: 'unitPrice', width: 80, render: (v: number) => `¥${Number(v).toFixed(2)}` },
+                { title: '折扣率', dataIndex: 'discountRate', key: 'discountRate', width: 70, render: (v: number) => v ? `${v}%` : '-' },
+                { title: '折扣金额', dataIndex: 'discountAmount', key: 'discountAmount', width: 80, render: (v: number) => v ? `¥${Number(v).toFixed(2)}` : '-' },
+                { title: '小计', dataIndex: 'amount', key: 'amount', width: 90, render: (v: number) => `¥${Number(v).toFixed(2)}` },
+              ]}
+            />
+          </>
         )}
       </Modal>
       <Modal title="新增销售订单" open={createVisible} onCancel={() => setCreateVisible(false)} width={800} footer={null}>
