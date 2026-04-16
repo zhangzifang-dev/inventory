@@ -134,9 +134,9 @@ export default function POS() {
 
   const productColumns = [
     { 
-      title: '操作', 
+      title: '', 
       key: 'action', 
-      width: 60, 
+      width: 40, 
       render: (_: any, record: any) => (
         <Button type="link" size="small" icon={<PlusOutlined />} onClick={() => addToOrder(record)} />
       )
@@ -144,7 +144,7 @@ export default function POS() {
     { 
       title: '库存', 
       key: 'stock', 
-      width: 70, 
+      width: 50, 
       render: (_: any, record: any) => {
         const qty = record.inventory?.quantity || 0;
         return <Tag color={qty <= 10 ? 'red' : 'green'}>{qty}</Tag>;
