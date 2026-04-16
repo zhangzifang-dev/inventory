@@ -48,7 +48,7 @@ export class ProductService {
 
     const [list, total] = await this.productRepository.findAndCount({
       where,
-      relations: ['category'],
+      relations: ['category', 'inventory'],
       skip: (page - 1) * pageSize,
       take: pageSize,
       order: { id: 'DESC' },
