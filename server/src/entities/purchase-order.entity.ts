@@ -36,7 +36,7 @@ export class PurchaseOrder {
   totalAmount: number;
 
   @Column({
-    type: 'enum',
+    type: 'simple-enum',
     enum: PurchaseOrderStatus,
     default: PurchaseOrderStatus.DRAFT,
   })

@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   ManyToOne,
+  JoinColumn,
   Index,
 } from 'typeorm';
 import { Product } from './product.entity';
@@ -24,7 +25,7 @@ export class InventoryLog {
   productId: number;
 
   @Column({
-    type: 'enum',
+    type: 'simple-enum',
     enum: InventoryLogType,
   })
   type: InventoryLogType;
@@ -58,8 +59,10 @@ export class InventoryLog {
   deletedBy: number;
 
   @ManyToOne(() => Product)
+  @JoinColumn({ name: 'product_id' })
   product: Product;
 
   @ManyToOne(() => User)
+  @JoinColumn({ name: 'created_by_id' })
   createdBy: User;
 }

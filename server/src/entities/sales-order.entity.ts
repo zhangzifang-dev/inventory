@@ -44,7 +44,7 @@ export class SalesOrder {
   finalAmount: number;
 
   @Column({
-    type: 'enum',
+    type: 'simple-enum',
     enum: SalesOrderStatus,
     default: SalesOrderStatus.DRAFT,
   })

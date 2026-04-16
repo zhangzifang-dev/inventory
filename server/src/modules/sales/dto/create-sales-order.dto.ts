@@ -13,7 +13,7 @@ import { CreateSalesOrderItemDto } from './create-sales-order-item.dto';
 export class CreateSalesOrderDto {
   @IsNumber()
   @IsNotEmpty({ message: '客户ID不能为空' })
-  customerId: number;
+  customerId!: number;
 
   @IsOptional()
   @IsNumber()
@@ -26,5 +26,5 @@ export class CreateSalesOrderDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateSalesOrderItemDto)
-  items: CreateSalesOrderItemDto[];
+  items!: CreateSalesOrderItemDto[];
 }

@@ -11,6 +11,8 @@ import { User } from '../src/entities/user.entity';
 import { Role } from '../src/entities/role.entity';
 import { Permission } from '../src/entities/permission.entity';
 
+jest.setTimeout(30000);
+
 describe('InventoryService (e2e)', () => {
   let service: InventoryService;
   let dataSource: DataSource;
